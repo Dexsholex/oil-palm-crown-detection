@@ -74,6 +74,8 @@ Once the pilot model/workflow is validated (>=90% counting accuracy target, idea
 3. Run `scripts/merge_master_inventory.py` to fold every processed block's `centroids`
    layer into one plantation-wide inventory GeoPackage/CSV.
 
-As of this writing the pipeline has processed 26 production blocks (~1,000,000+ detected
-palms) on `oil_palm_crown-current`, the model retrained on dense-canopy and young-palm
-failure cases found during production rollout.
+As of this writing the pipeline has processed 26 production blocks — 12,166.6 ha net
+coverage, 718,751 detected palms after cross-block overlap resolution — on
+`oil_palm_crown-current`, the model retrained on dense-canopy and young-palm failure
+cases found during production rollout. See [RESULTS.md](RESULTS.md) for the full
+per-block breakdown and methodology notes.

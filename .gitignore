@@ -1,0 +1,31 @@
+# Environment
+.venv/
+__pycache__/
+*.pyc
+
+# Regenerable / huge intermediate data — not needed to reproduce the pipeline
+tiles/
+annotations/to_label/
+annotations/yolo_dataset/
+runs/
+data/
+
+# Client deliverables — proprietary detection results, kept out of the public repo
+outputs/
+
+# Raw imagery / geospatial data (orthomosaics, tile chips, inventory geopackages)
+*.tif
+*.tiff
+*.jpg
+*.jpeg
+*.gpkg
+
+# Model checkpoints — only the current-best production model is tracked, not the
+# full training history or generic pretrained base weights.
+models/*/weights/
+!models/oil_palm_crown-current/
+!models/oil_palm_crown-current/weights/
+!models/oil_palm_crown-current/weights/best.pt
+/yolo26n.pt
+/yolov8s.pt
+models/yolov8m.pt

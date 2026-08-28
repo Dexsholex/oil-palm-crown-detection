@@ -1,0 +1,233 @@
+<title>New Block Workflow</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root {
+    --paper: #f6f7f2;
+    --surface: #fdfdfa;
+    --ink: #1c241f;
+    --ink-muted: #4c584f;
+    --ink-faint: #7c877e;
+    --canopy: #3b6e52;
+    --canopy-deep: #244934;
+    --survey: #2e5c8a;
+    --gold: #a8791f;
+    --line: #dadfd2;
+    --radius: 3px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #12160f; --surface: #171d15; --ink: #e7ebe2; --ink-muted: #a9b3a3;
+      --ink-faint: #77816f; --canopy: #6fbe93; --canopy-deep: #8fd4ae;
+      --survey: #7cabdd; --gold: #d9a94a; --line: #2b332a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #12160f; --surface: #171d15; --ink: #e7ebe2; --ink-muted: #a9b3a3;
+    --ink-faint: #77816f; --canopy: #6fbe93; --canopy-deep: #8fd4ae;
+    --survey: #7cabdd; --gold: #d9a94a; --line: #2b332a;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-size: 15px; line-height: 1.55; margin: 0; padding: 2.5rem 1.5rem 4rem;
+  }
+  .sheet { max-width: 900px; margin: 0 auto; }
+  h1, h2, h3 { font-family: 'Spectral', Georgia, serif; text-wrap: balance; margin: 0; }
+
+  .head { display: flex; flex-direction: column; gap: 0.6rem; padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--canopy); margin-bottom: 1.75rem; }
+  .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--canopy); font-weight: 500; }
+  .head h1 { font-size: 2.05rem; font-weight: 700; color: var(--ink); }
+  .head .sub { color: var(--ink-muted); font-size: 1rem; max-width: 62ch; }
+
+  .stat-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+    margin-top: 0.75rem; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .stat { padding: 0.6rem 0.85rem; border-right: 1px solid var(--line); background: var(--surface); }
+  .stat:last-child { border-right: none; }
+  .stat .k { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--ink-faint);
+    text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat .v { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums;
+    font-size: 0.95rem; color: var(--ink); font-weight: 500; margin-top: 0.1rem; }
+
+  section { margin-bottom: 2.1rem; }
+  .section-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--survey); font-weight: 500; margin-bottom: 0.6rem; display: block; }
+  h2.title { font-size: 1.28rem; font-weight: 600; color: var(--ink); margin-bottom: 0.5rem; }
+  p { margin: 0 0 0.7rem; max-width: 70ch; }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--ink); font-weight: 600; }
+  code { font-family: 'IBM Plex Mono', monospace; font-size: 0.86em; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 2px; padding: 0.05em 0.35em; }
+
+  /* ---- once vs repeat framing ---- */
+  .phase-once, .phase-repeat {
+    border-radius: var(--radius); padding: 1.1rem 1.3rem; border: 1px solid var(--line);
+  }
+  .phase-once { background: var(--surface); opacity: 0.88; }
+  .phase-repeat { background: var(--surface); border-left: 3px solid var(--canopy); }
+  .phase-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; text-transform: uppercase;
+    letter-spacing: 0.06em; font-weight: 500; display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.15rem 0.55rem; border-radius: 999px; margin-bottom: 0.6rem; }
+  .phase-once .phase-label { color: var(--ink-faint); background: var(--paper); border: 1px solid var(--line); }
+  .phase-repeat .phase-label { color: var(--canopy-deep); background: var(--paper); border: 1px solid var(--canopy); }
+  .phase-once h3, .phase-repeat h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; }
+  .phase-once p, .phase-repeat p { font-size: 0.9rem; color: var(--ink-muted); }
+
+  .funnel-arrow { display: flex; justify-content: center; padding: 0.5rem 0; color: var(--ink-faint);
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; letter-spacing: 0.04em; }
+
+  /* ---- pipeline steps ---- */
+  .pipeline { position: relative; padding-left: 2.4rem; }
+  .pipeline::before { content: ""; position: absolute; left: 0.85rem; top: 0.5rem; bottom: 0.5rem;
+    width: 1.5px; background: var(--line); }
+  .step { position: relative; padding: 0 0 1.15rem; }
+  .step:last-child { padding-bottom: 0; }
+  .step::before { content: attr(data-n); position: absolute; left: -2.4rem; top: 0.05rem;
+    width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--surface);
+    border: 1.5px solid var(--canopy); color: var(--canopy-deep); font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+  .step h3 { font-size: 0.97rem; font-weight: 600; color: var(--ink); display: inline; }
+  .step p { font-size: 0.89rem; color: var(--ink-muted); margin: 0.2rem 0 0; }
+  .step .tag { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--survey);
+    margin-left: 0.4rem; }
+
+  /* ---- loop visual ---- */
+  .loop-wrap { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    padding: 1.4rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+  .loop-node { text-align: center; font-size: 0.82rem; color: var(--ink-muted); max-width: 130px; }
+  .loop-node .box { border: 1.5px solid var(--canopy); border-radius: var(--radius); padding: 0.6rem 0.7rem;
+    background: var(--paper); color: var(--ink); font-weight: 500; font-size: 0.85rem; margin-bottom: 0.35rem; }
+  .loop-node.model .box { border-color: var(--gold); color: var(--ink); font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; }
+  .loop-arrow { color: var(--ink-faint); font-size: 1.3rem; }
+  .loop-repeat { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--survey);
+    text-align: center; width: 100%; margin-top: 0.6rem; }
+
+  .qa { display: flex; flex-direction: column; gap: 1rem; }
+  .qa-item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.9rem 1.1rem; }
+  .q { font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; color: var(--survey); font-weight: 500; margin-bottom: 0.35rem; }
+  .q::before { content: "Q — "; color: var(--ink-faint); }
+  .a { font-size: 0.92rem; color: var(--ink); margin: 0; }
+  .a::before { content: "A — "; color: var(--ink-faint); font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; }
+
+  .caveat { border-left: 3px solid var(--gold); background: var(--surface); border-top: 1px solid var(--line);
+    border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); border-radius: var(--radius);
+    padding: 0.85rem 1.1rem; font-size: 0.89rem; color: var(--ink-muted); }
+  .caveat .lbl { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--gold); font-weight: 500; display: block; margin-bottom: 0.3rem; }
+
+  footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--line);
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; color: var(--ink-faint);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+
+  @media (max-width: 520px) {
+    .head h1 { font-size: 1.5rem; }
+    body { padding: 1.5rem 1rem 3rem; }
+    .loop-wrap { flex-direction: column; }
+    .loop-arrow { transform: rotate(90deg); }
+  }
+</style>
+
+<div class="sheet">
+
+  <div class="head">
+    <span class="eyebrow">Scaling Briefing — Client Reference</span>
+    <h1>From One Block to the Whole Plantation</h1>
+    <p class="sub">How each new 300 ha orthomosaic — as it comes off the drone — flows through the already-trained model to become a geolocated palm count, without repeating the annotation or training work.</p>
+    <div class="stat-strip">
+      <div class="stat"><div class="k">Pilot area</div><div class="v">~85 ha</div></div>
+      <div class="stat"><div class="k">Full plantation</div><div class="v">~6,000 ha</div></div>
+      <div class="stat"><div class="k">Remaining blocks</div><div class="v">~19</div></div>
+      <div class="stat"><div class="k">Model retrained per block</div><div class="v">No</div></div>
+    </div>
+  </div>
+
+  <section>
+    <span class="section-label">01 — The core idea</span>
+    <h2 class="title">Train an inspector once, send them to every new field</h2>
+    <p>The expensive work — manually annotating crowns, training the detector, validating it against a real manual count — happens <strong>once</strong>, on the pilot. Every block after that is just <strong>running</strong> that already-proven model on new imagery. That's the entire reason the pilot phase is worth the upfront time: it converts a one-time cost into a fast, repeatable step.</p>
+    <div style="display:flex; flex-direction:column; gap:0.8rem; margin-top:1rem;">
+      <div class="phase-once">
+        <span class="phase-label">Done once — pilot only</span>
+        <h3>Annotate, train, validate</h3>
+        <p>~1,200 hand-labeled crowns → train the detector → verify against a manual count. This is the phase we just completed.</p>
+      </div>
+      <div class="funnel-arrow">↓ produces a frozen, reusable model ↓</div>
+      <div class="phase-repeat">
+        <span class="phase-label">Repeated — every new block</span>
+        <h3>Register, run, deliver</h3>
+        <p>New orthomosaic in → same model runs → geolocated inventory out. No annotation, no training, no manual review of the model itself.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="section-label">02 — What happens for each new block</span>
+    <h2 class="title">Five steps, none of them manual model work</h2>
+    <div class="pipeline">
+      <div class="step" data-n="1"><h3>Data arrives</h3><span class="tag">from the client</span><p>RGB orthomosaic for the new ~300 ha block, plus DSM/DTM if available from that flight — same format as the pilot.</p></div>
+      <div class="step" data-n="2"><h3>Register the block</h3><span class="tag">~1 minute</span><p>Point the pipeline at the new file paths. No annotation, no configuration beyond this.</p></div>
+      <div class="step" data-n="3"><h3>Run the frozen model</h3><span class="tag">automated</span><p>Tile the orthomosaic → detect every crown → convert to real GPS coordinates → remove tile-boundary duplicates. Identical process to the pilot, same model weights.</p></div>
+      <div class="step" data-n="4"><h3>Block inventory out</h3><span class="tag">automated</span><p>A GIS-ready file for that block: palm count, GPS locations, confidence scores, crown geometry.</p></div>
+      <div class="step" data-n="5"><h3>Merge into the master inventory</h3><span class="tag">automated</span><p>Each new block's results fold into one running plantation-wide count and map.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="section-label">03 — The repeating loop</span>
+    <h2 class="title">Same model, every block, ×19 more times</h2>
+    <div class="loop-wrap">
+      <div class="loop-node"><div class="box">New block<br>orthomosaic</div>in from the drone</div>
+      <div class="loop-arrow">→</div>
+      <div class="loop-node model"><div class="box">trained<br>detector</div>frozen, unchanged</div>
+      <div class="loop-arrow">→</div>
+      <div class="loop-node"><div class="box">Block<br>inventory</div>count + GPS locations</div>
+      <div class="loop-arrow">→</div>
+      <div class="loop-node"><div class="box">Master<br>inventory</div>whole-plantation map</div>
+      <div class="loop-repeat">repeats for each of the ~19 remaining blocks as the drone data arrives</div>
+    </div>
+  </section>
+
+  <section>
+    <span class="section-label">04 — The one exception</span>
+    <h2 class="title">When we'd actually touch the model again</h2>
+    <div class="caveat">
+      <span class="lbl">Not the routine case</span>
+      If a new block shows something genuinely unfamiliar — a weed type, terrain, or lighting condition the pilot never saw — that specific pattern gets added to the training data and the model gets a targeted update. This is flagged during our own QC pass on each block's results, not something the client needs to watch for. It's the exception; running the existing model is the rule.
+    </div>
+  </section>
+
+  <section>
+    <span class="section-label">05 — Anticipated questions</span>
+    <h2 class="title">Talking points</h2>
+    <div class="qa">
+      <div class="qa-item">
+        <div class="q">Do you need to re-annotate or retrain for every new block?</div>
+        <p class="a">No — that's the whole point of the pilot phase. The model is built once and reused unchanged across all ~19 remaining blocks.</p>
+      </div>
+      <div class="qa-item">
+        <div class="q">What do you need from us for each new block?</div>
+        <p class="a">Just the RGB orthomosaic. DSM/DTM are a helpful bonus for extra quality-control, not required.</p>
+      </div>
+      <div class="qa-item">
+        <div class="q">How long does a new block take to process?</div>
+        <p class="a">Registering and running the model is fast — a matter of minutes for the detection step itself, since there's no annotation or training involved, just execution of the already-finished model.</p>
+      </div>
+      <div class="qa-item">
+        <div class="q">What if the new areas look different from the pilot?</div>
+        <p class="a">Every block's results get QC-reviewed. If something genuinely new shows up, that becomes a targeted training update — the exception, not something that stalls the rollout.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Model trained once on the pilot block</span>
+    <span>Reused unchanged across ~19 remaining blocks</span>
+    <span>Master inventory grows as each block completes</span>
+  </footer>
+
+</div>

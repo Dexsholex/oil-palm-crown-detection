@@ -1,0 +1,33 @@
+# Global project settings for the oil palm crown detection pipeline.
+# Per-block data paths live in blocks.yaml (keeps this file stable as blocks are added).
+
+crs: "EPSG:32631"          # WGS 84 / UTM zone 31N — all geospatial outputs stay in this CRS
+classes:
+  - oil_palm
+
+tiling:
+  size_px: 1280             # chip size fed to YOLO
+  overlap_px: 256           # overlap so crowns on tile edges aren't cut/missed
+  nodata_skip_fraction: 0.98  # skip a tile if >=98% of pixels are nodata/black
+
+annotation:
+  target_crown_count: 1000
+  format: yolo               # one .txt per image, class 0 = oil_palm
+
+model:
+  arch: models/yolov8m.pt    # starting checkpoint (COCO-pretrained), fine-tuned on crowns; pre-downloaded, path relative to project root
+  imgsz: 1280
+  device: 0                  # CUDA device index (RTX 4070 laptop, 8GB VRAM)
+  batch: 8                   # conservative for 8GB VRAM at imgsz 1280; lower if OOM
+
+inference:
+  conf_thresh: 0.25
+  iou_thresh: 0.45           # NMS IoU threshold within a tile
+  merge_iou_thresh: 0.3       # IoU threshold for de-duplicating across overlapping tiles
+
+paths:
+  tiles_dir: tiles
+  annotations_dir: annotations
+  yolo_dataset_dir: annotations/yolo_dataset
+  models_dir: models
+  outputs_dir: outputs

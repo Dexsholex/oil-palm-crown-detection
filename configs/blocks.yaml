@@ -1,0 +1,170 @@
+# Registry of 300-ha production blocks. Add one entry per block as data arrives.
+# dsm/dtm are optional (null until provided) — used only for CHM-based QC, not required for detection.
+
+blocks:
+  - block_id: pilot
+    description: "Pilot dev subset (~85 ha) used to build and validate the workflow"
+    # Samplesize_clean.tif is a re-encoded copy of the original with a rebuilt overview
+    # pyramid — the original's embedded overviews were stale/corrupted (looked black when
+    # zoomed out in QGIS despite the real full-res data being fine). Identical CRS, extent,
+    # resolution, and pixel values to the original — just fixes rendering. Use this one when
+    # opening directly in QGIS; the original Samplesize.tif is left untouched as-is.
+    rgb: "E:/SHOLA ARPN/compressed/data/Samplesize_clean.tif"
+    dsm: "E:/SHOLA ARPN/compressed/dsm data/dsm.tif"
+    dtm: "E:/SHOLA ARPN/compressed/dtm data/dtm.tif"
+
+  - block_id: block_002
+    description: "second production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_002/rgb.tif"
+    dsm: "E:/SHOLA ARPN/compressed/block_002/dsm.tif"
+    dtm: "E:/SHOLA ARPN/compressed/block_002/dtm.tif"
+
+  - block_id: block_003
+    description: "third production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_003/rgb.tif"
+    dsm: "E:/SHOLA ARPN/compressed/block_003/dsm.tif"
+    dtm: "E:/SHOLA ARPN/compressed/block_003/dtm.tif"
+
+  - block_id: block_004
+    description: "fourth production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_004/rgb.tif"
+    dsm: "E:/SHOLA ARPN/compressed/block_004/dsm.tif"
+    dtm: "E:/SHOLA ARPN/compressed/block_004/dtm.tif"
+
+  - block_id: block_005
+    description: "fifth production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_005/rgb.tif"
+    dsm: "E:/SHOLA ARPN/compressed/block_005/dsm.tif"
+    dtm: "E:/SHOLA ARPN/compressed/block_005/dtm.tif"
+
+  - block_id: block_006
+    description: "sixth production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_006/rgb.tif"
+    dsm: "E:/SHOLA ARPN/compressed/block_006/dsm.tif"
+    dtm: "E:/SHOLA ARPN/compressed/block_006/dtm.tif"
+
+  - block_id: block_007
+    description: "7th production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_007/rgb.tif"
+    dsm: "E:/SHOLA ARPN/compressed/block_007/dsm.tif"
+    dtm: "E:/SHOLA ARPN/compressed/block_007/dtm.tif"
+
+  - block_id: block_008
+    description: "8th production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_008/rgb.tif"
+    dsm: "E:/SHOLA ARPN/compressed/block_008/dsm.tif"
+    dtm: "E:/SHOLA ARPN/compressed/block_008/dtm.tif"
+
+  - block_id: block_009
+    description: "9th production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_009/rgb.tif"
+    dsm: "E:/SHOLA ARPN/compressed/block_009/dsm.tif"
+    dtm: "E:/SHOLA ARPN/compressed/block_009/dtm.tif"
+
+  - block_id: block_010
+    description: "10th production block"
+    # dsm/dtm not yet delivered for this block — folder only has rgb.tif on disk.
+    rgb: "E:/SHOLA ARPN/compressed/block_010/rgb.tif"
+    dsm: null
+    dtm: null
+
+  - block_id: block_011
+    description: "11th production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_011/rgb.tif"
+    dsm: null
+    dtm: null
+
+  - block_id: block_012
+    description: "12th production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_012/rgb.tif"
+    dsm: null
+    dtm: null
+
+  - block_id: block_013
+    description: "13th production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_013/rgb.tif"
+    dsm: null
+    dtm: null
+
+  - block_id: block_014
+    description: "14th production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_014/rgb.tif"
+    dsm: null
+    dtm: null
+
+  - block_id: block_015
+    description: "15th production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_015/rgb.tif"
+    dsm: null
+    dtm: null
+
+  - block_id: block_016
+    description: "16th production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_016/rgb.tif"
+    dsm: null
+    dtm: null
+
+  - block_id: block_017
+    description: "17th production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_017/rgb.tif"
+    dsm: null
+    dtm: null
+
+  - block_id: block_018
+    description: "18th production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_018/rgb.tif"
+    dsm: null
+    dtm: null
+
+  - block_id: block_019
+    description: "19th production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_019/rgb.tif"
+    dsm: null
+    dtm: null
+
+  - block_id: block_020
+    description: "20th production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_020/rgb.tif"
+    dsm: null
+    dtm: null
+
+  - block_id: block_021
+    description: "21st production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_021/rgb.tif"
+    dsm: null
+    dtm: null
+
+  # Original block_022 upload (2026-08-27) was a confirmed duplicate of block_020 and was
+  # deleted. Client re-delivered genuinely distinct data on 2026-08-27 (73.9GB, vs the
+  # deleted duplicate's 23.8GB) -- back to a normal entry.
+  - block_id: block_022
+    description: "22nd production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_022/rgb.tif"
+    dsm: null
+    dtm: null
+
+  - block_id: block_023
+    description: "23rd production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_023/rgb.tif"
+    dsm: null
+    dtm: null
+
+  - block_id: block_024
+    description: "24th production block"
+    # delivered filename is AP10B.tif, not rgb.tif like other blocks -- pointed at it
+    # directly rather than renaming, since the pipeline just resolves whatever path is here.
+    rgb: "E:/SHOLA ARPN/compressed/block_024/AP10B.tif"
+    dsm: null
+    dtm: null
+
+  - block_id: block_025
+    description: "25th production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_025/rgb.tif"
+    dsm: null
+    dtm: null
+
+  - block_id: block_026
+    description: "26th production block"
+    rgb: "E:/SHOLA ARPN/compressed/block_026/rgb.tif"
+    dsm: null
+    dtm: null

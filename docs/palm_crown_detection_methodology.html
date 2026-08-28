@@ -1,0 +1,435 @@
+<title>Palm Crown Detection</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root {
+    --paper: #f6f7f2;
+    --surface: #fdfdfa;
+    --ink: #1c241f;
+    --ink-muted: #4c584f;
+    --ink-faint: #7c877e;
+    --canopy: #3b6e52;
+    --canopy-deep: #244934;
+    --survey: #2e5c8a;
+    --gold: #a8791f;
+    --line: #dadfd2;
+    --danger: #9a3b2c;
+    --radius: 3px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #12160f;
+      --surface: #171d15;
+      --ink: #e7ebe2;
+      --ink-muted: #a9b3a3;
+      --ink-faint: #77816f;
+      --canopy: #6fbe93;
+      --canopy-deep: #8fd4ae;
+      --survey: #7cabdd;
+      --gold: #d9a94a;
+      --line: #2b332a;
+      --danger: #d98269;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #12160f;
+    --surface: #171d15;
+    --ink: #e7ebe2;
+    --ink-muted: #a9b3a3;
+    --ink-faint: #77816f;
+    --canopy: #6fbe93;
+    --canopy-deep: #8fd4ae;
+    --survey: #7cabdd;
+    --gold: #d9a94a;
+    --line: #2b332a;
+    --danger: #d98269;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    margin: 0;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  .sheet {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  h1, h2, h3 { font-family: 'Spectral', Georgia, serif; text-wrap: balance; margin: 0; }
+
+  /* ---- header ---- */
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--canopy);
+    margin-bottom: 1.75rem;
+  }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--canopy);
+    font-weight: 500;
+  }
+  .head h1 {
+    font-size: 2.15rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .head .sub {
+    color: var(--ink-muted);
+    font-size: 1rem;
+    max-width: 56ch;
+  }
+
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+    gap: 0;
+    margin-top: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .stat {
+    padding: 0.6rem 0.85rem;
+    border-right: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .stat:last-child { border-right: none; }
+  .stat .k {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .stat .v {
+    font-family: 'IBM Plex Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.95rem;
+    color: var(--ink);
+    font-weight: 500;
+    margin-top: 0.1rem;
+  }
+
+  section { margin-bottom: 2.1rem; }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--survey);
+    font-weight: 500;
+    margin-bottom: 0.6rem;
+    display: block;
+  }
+
+  h2.title { font-size: 1.3rem; font-weight: 600; color: var(--ink); margin-bottom: 0.5rem; }
+
+  p { margin: 0 0 0.7rem; max-width: 68ch; }
+  p:last-child { margin-bottom: 0; }
+
+  strong { color: var(--ink); font-weight: 600; }
+  code, .mono {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.86em;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 0.05em 0.35em;
+  }
+
+  /* ---- glossary cards ---- */
+  .glossary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.9rem;
+  }
+  .gcard {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--canopy);
+    border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+  }
+  .gcard h3 { font-size: 0.98rem; font-weight: 600; color: var(--canopy-deep); margin-bottom: 0.3rem; }
+  .gcard p { font-size: 0.89rem; color: var(--ink-muted); margin: 0; }
+
+  /* ---- pipeline ---- */
+  .pipeline {
+    position: relative;
+    padding-left: 2.4rem;
+  }
+  .pipeline::before {
+    content: "";
+    position: absolute;
+    left: 0.85rem;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 1.5px;
+    background: var(--line);
+  }
+  .step {
+    position: relative;
+    padding: 0 0 1.15rem;
+  }
+  .step:last-child { padding-bottom: 0; }
+  .step::before {
+    content: attr(data-n);
+    position: absolute;
+    left: -2.4rem;
+    top: 0.05rem;
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1.5px solid var(--canopy);
+    color: var(--canopy-deep);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step h3 { font-size: 0.97rem; font-weight: 600; color: var(--ink); display: inline; }
+  .step p { font-size: 0.89rem; color: var(--ink-muted); margin: 0.2rem 0 0; }
+
+  /* ---- qa ---- */
+  .qa { display: flex; flex-direction: column; gap: 1rem; }
+  .qa-item {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.9rem 1.1rem;
+  }
+  .q {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--survey);
+    font-weight: 500;
+    margin-bottom: 0.35rem;
+  }
+  .q::before { content: "Q — "; color: var(--ink-faint); }
+  .a { font-size: 0.92rem; color: var(--ink); margin: 0; }
+  .a::before { content: "A — "; color: var(--ink-faint); font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; }
+
+  .caveat {
+    border-left: 3px solid var(--gold);
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.85rem 1.1rem;
+    font-size: 0.89rem;
+    color: var(--ink-muted);
+  }
+  .caveat .lbl {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.87rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid var(--line);
+  }
+  th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-faint);
+    font-weight: 500;
+  }
+  td.num { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+
+  footer {
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.74rem;
+    color: var(--ink-faint);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  @media (max-width: 520px) {
+    .head h1 { font-size: 1.6rem; }
+    body { padding: 1.5rem 1rem 3rem; }
+  }
+</style>
+
+<div class="sheet">
+
+  <div class="head">
+    <span class="eyebrow">Methodology Briefing — Client Reference</span>
+    <h1>Palm Crown Detection &amp; Counting</h1>
+    <p class="sub">How individual oil palm crowns are found, located, and counted from UAV orthomosaic imagery — the approach, the reasoning, and the questions likely to come up.</p>
+    <div class="stat-strip">
+      <div class="stat"><div class="k">Pilot area</div><div class="v">~85 ha</div></div>
+      <div class="stat"><div class="k">GSD</div><div class="v">2.13 cm/px</div></div>
+      <div class="stat"><div class="k">CRS</div><div class="v">EPSG:32631</div></div>
+      <div class="stat"><div class="k">Ground truth</div><div class="v">1,226 crowns</div></div>
+      <div class="stat"><div class="k">Detector</div><div class="v">YOLOv8</div></div>
+    </div>
+  </div>
+
+  <section>
+    <span class="section-label">01 — What this actually is</span>
+    <h2 class="title">Deep learning, not a rules-based script</h2>
+    <p>This uses <strong>deep learning</strong> — a subset of machine learning built on convolutional neural networks (CNNs). Specifically, an <strong>object detector</strong> (not a classifier): it doesn't just say "this is a plantation," it finds every individual crown and draws a box around it with a confidence score. That distinction is why it can produce a countable inventory rather than a coverage estimate.</p>
+    <div class="glossary" style="margin-top: 0.9rem;">
+      <div class="gcard">
+        <h3>YOLO</h3>
+        <p>"You Only Look Once" — a CNN architecture that scans an image once and predicts all object boxes + classes in a single pass. Built for real-time detection speed.</p>
+      </div>
+      <div class="gcard">
+        <h3>Transfer learning</h3>
+        <p>The model starts from weights already trained on millions of general images, then gets fine-tuned on our ~1,200 crown examples — not trained from zero.</p>
+      </div>
+      <div class="gcard">
+        <h3>Object detection vs. classification</h3>
+        <p>Classification: "does this image contain palms?" Detection: "here are the 14 individual crowns, each with a location." We need the latter.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="section-label">02 — Why YOLO, specifically</span>
+    <h2 class="title">Five reasons, not a default choice</h2>
+    <div class="pipeline" style="padding-left: 1.5rem;">
+      <div class="step" style="padding-bottom: 0.6rem;">
+        <div style="display:flex; gap:0.6rem; align-items:baseline;">
+          <span style="color: var(--gold); font-family:'IBM Plex Mono',monospace; font-size:0.8rem;">01</span>
+          <p style="margin:0;"><strong>Task fit</strong> — needs individual locations, which requires a detector, not a classifier or a segmentation model (segmentation was deliberately avoided as unneeded complexity unless overlapping crowns prove to be a real problem).</p>
+        </div>
+      </div>
+      <div class="step" style="padding-bottom: 0.6rem;">
+        <div style="display:flex; gap:0.6rem; align-items:baseline;">
+          <span style="color: var(--gold); font-family:'IBM Plex Mono',monospace; font-size:0.8rem;">02</span>
+          <p style="margin:0;"><strong>Inference speed at scale</strong> — tens of thousands of image tiles across 6,000 ha need processing; YOLO is built for exactly that throughput.</p>
+        </div>
+      </div>
+      <div class="step" style="padding-bottom: 0.6rem;">
+        <div style="display:flex; gap:0.6rem; align-items:baseline;">
+          <span style="color: var(--gold); font-family:'IBM Plex Mono',monospace; font-size:0.8rem;">03</span>
+          <p style="margin:0;"><strong>Works with modest training data</strong> — transfer learning means ~1,200 annotated crowns is enough; training from scratch would need far more.</p>
+        </div>
+      </div>
+      <div class="step" style="padding-bottom: 0.6rem;">
+        <div style="display:flex; gap:0.6rem; align-items:baseline;">
+          <span style="color: var(--gold); font-family:'IBM Plex Mono',monospace; font-size:0.8rem;">04</span>
+          <p style="margin:0;"><strong>Established in remote sensing</strong> — CNN object detection for tree/palm crown counting from UAV imagery is a published, proven technique.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div style="display:flex; gap:0.6rem; align-items:baseline;">
+          <span style="color: var(--gold); font-family:'IBM Plex Mono',monospace; font-size:0.8rem;">05</span>
+          <p style="margin:0;"><strong>Runs on the hardware on hand</strong> — a single consumer GPU, no cluster — fits the delivery timeline without added infrastructure cost.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="section-label">03 — End-to-end pipeline</span>
+    <h2 class="title">Orthomosaic in, geospatial inventory out</h2>
+    <div class="pipeline">
+      <div class="step" data-n="1"><h3>Orthomosaic in</h3><p>One large georeferenced RGB GeoTIFF — 48,012 × 39,196 px at 2.13 cm/px for the pilot.</p></div>
+      <div class="step" data-n="2"><h3>Tile</h3><p>Cut into overlapping 1,280 px chips. Overlap (256 px) guarantees a crown on a tile boundary is still whole in a neighboring tile.</p></div>
+      <div class="step" data-n="3"><h3>Annotate</h3><p>Humans draw ground-truth boxes on a representative, stratified sample — dense/sparse palms, weeds, roads, bare soil.</p></div>
+      <div class="step" data-n="4"><h3>Train</h3><p>The model learns crown vs. background by adjusting its weights against the ground truth, over repeated passes (epochs), with early stopping once it plateaus.</p></div>
+      <div class="step" data-n="5"><h3>Validate on unseen ground</h3><p>Tested on tiles from a <em>spatially separate</em> part of the block — not random tiles mixed with training data — so the number reflects real generalization.</p></div>
+      <div class="step" data-n="6"><h3>Infer at full scale</h3><p>The frozen, trained model runs over every tile in the block.</p></div>
+      <div class="step" data-n="7"><h3>Geo-reference</h3><p>Each tile carries its pixel→UTM transform from the tiling step, so every detection converts back to real Easting/Northing.</p></div>
+      <div class="step" data-n="8"><h3>De-duplicate</h3><p>Overlapping tiles can detect the same physical palm twice; geometric matching keeps the single highest-confidence detection.</p></div>
+      <div class="step" data-n="9"><h3>Centroid</h3><p>Each final crown box's geometric center becomes that tree's point location.</p></div>
+      <div class="step" data-n="10"><h3>Inventory out</h3><p>Tree ID, Easting/Northing, confidence, crown geometry, block ID — a GeoPackage + CSV, opens directly in QGIS/ArcGIS.</p></div>
+      <div class="step" data-n="11"><h3>Count</h3><p>Total de-duplicated detections = the palm count for that area.</p></div>
+      <div class="step" data-n="12"><h3>QC</h3><p>Sample false positives/negatives; cross-check canopy height (CHM); compare against a manually-counted reference patch for a real accuracy figure.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="section-label">04 — Scaling to new blocks</span>
+    <h2 class="title">The model is trained once, reused everywhere</h2>
+    <p>For every subsequent 300 ha block: <code>tile → run the same frozen model → geo-reference → de-duplicate → centroids</code>. No re-annotation, no re-training — just re-running two scripts against the new file. Retraining only happens if a block reveals a genuinely new failure pattern (an unfamiliar weed type, say) — the exception, not the routine.</p>
+  </section>
+
+  <section>
+    <span class="section-label">05 — On the canopy-height (CHM) check</span>
+    <h2 class="title">Height confirms plausibility — it doesn't confirm identity</h2>
+    <p>Sampling the canopy height model (DSM − DTM) at all 1,226 confirmed crown locations gives this plantation's real, measured height range — not a textbook figure:</p>
+    <table style="margin: 0.7rem 0;">
+      <thead><tr><th>p5</th><th>p25</th><th>Median</th><th>p75</th><th>p95</th><th>Max</th></tr></thead>
+      <tbody><tr>
+        <td class="num">0.92 m</td><td class="num">1.95 m</td><td class="num">2.33 m</td>
+        <td class="num">2.75 m</td><td class="num">3.81 m</td><td class="num">5.53 m</td>
+      </tr></tbody>
+    </table>
+    <p style="font-size: 0.85rem; color: var(--ink-muted);">(Short for oil palm broadly — consistent with a young plantation, not mature trees. Worth confirming with the client directly.)</p>
+    <div class="caveat">
+      <span class="lbl">The honest limit</span>
+      CHM measures height only, not shape. It reliably rejects things <em>too short</em> to be a real palm (a weed clump at 0.3 m). It <strong>cannot</strong> tell a young palm apart from a light pole or another tree species at the same height — height alone doesn't encode what an object looks like. That disambiguation is done primarily by the model's learned <em>visual</em> pattern (crown shape, texture, color from the RGB training data), with CHM as a secondary plausibility filter and human visual QC as the final backstop.
+    </div>
+  </section>
+
+  <section>
+    <span class="section-label">06 — Anticipated questions</span>
+    <h2 class="title">Talking points</h2>
+    <div class="qa">
+      <div class="qa-item">
+        <div class="q">Did you use AI or machine learning?</div>
+        <p class="a">Yes — deep learning, specifically a convolutional neural network trained to detect oil palm crowns as objects.</p>
+      </div>
+      <div class="qa-item">
+        <div class="q">What is YOLO and why that model?</div>
+        <p class="a">A real-time object detection architecture. Chosen for task fit, inference speed at plantation scale, low training-data requirements via transfer learning, precedent in remote sensing, and it runs on the hardware available — see section 02.</p>
+      </div>
+      <div class="qa-item">
+        <div class="q">How do you know the count is accurate?</div>
+        <p class="a">Reported honestly via standard detection metrics (precision, recall, mAP) on a spatially held-out test set, plus counting accuracy against a manually, independently counted reference area — not a self-reported figure.</p>
+      </div>
+      <div class="qa-item">
+        <div class="q">How does this handle the rest of the plantation?</div>
+        <p class="a">The trained model is frozen and re-applied to each new block's orthomosaic — same pipeline, no re-training required in the normal case.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>CRS EPSG:32631 · WGS 84 / UTM 31N</span>
+    <span>Tile 1280px / 256px overlap</span>
+    <span>Training: single RTX 4070, local</span>
+  </footer>
+
+</div>

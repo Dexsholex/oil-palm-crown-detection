@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this code or model, please cite it as below."
+type: software
+title: "Oil Palm Crown Detection & Counting from UAV RGB Orthomosaics"
+abstract: >-
+  A YOLOv8s single-class detector and geospatial pipeline that detects and counts individual
+  oil palms in drone RGB orthomosaics and produces a GIS-ready palm inventory. Used in
+  production to count 718,751 palms over 12,166.6 ha.
+authors:
+  - given-names: Oluwasola
+    family-names: Oyinloye
+    email: abdullahioyinloye1115@gmail.com
+version: 1.0.0
+license: AGPL-3.0-only
+repository-code: "https://github.com/Dexsholex/oil-palm-crown-detection"
+keywords:
+  - oil palm
+  - tree counting
+  - object detection
+  - YOLOv8
+  - UAV
+  - remote sensing
+  - precision agriculture

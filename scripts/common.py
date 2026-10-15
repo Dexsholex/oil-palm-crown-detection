@@ -23,6 +23,6 @@ def get_block(block_id: str) -> dict:
 
 
 def resolve_path(p) -> Path:
-    """paths in project_config.yaml are relative to PROJECT_ROOT; block data paths are absolute."""
+    """Absolute paths are used as-is; relative paths (config or block data) resolve against PROJECT_ROOT."""
     p = Path(p)
     return p if p.is_absolute() else (PROJECT_ROOT / p)

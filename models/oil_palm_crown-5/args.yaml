@@ -1,7 +1,7 @@
 task: detect
 mode: train
 model: models/oil_palm_crown-4/weights/best.pt
-data: E:\SHOLA ARPN\compressed\oil_palm_pipeline\annotations\yolo_dataset\data.yaml
+data: annotations/yolo_dataset/data.yaml
 epochs: 100
 time: null
 patience: 25
@@ -12,7 +12,7 @@ save_period: -1
 cache: ram
 device: '0'
 workers: 8
-project: E:\SHOLA ARPN\compressed\oil_palm_pipeline\models
+project: models
 name: oil_palm_crown-5
 exist_ok: false
 pretrained: true
@@ -113,4 +113,4 @@ auto_augment: randaugment
 erasing: 0.4
 cfg: null
 tracker: tracktrack.yaml
-save_dir: E:\SHOLA ARPN\compressed\oil_palm_pipeline\models\oil_palm_crown-5
+save_dir: models/oil_palm_crown-5

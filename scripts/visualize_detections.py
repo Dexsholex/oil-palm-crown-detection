@@ -1,6 +1,6 @@
 """
-Draw the model's detections as boxes on a real image crop, for visual QC / client
-presentation (brief section 6: "visual detection of individual crowns").
+Draw the model's detections as boxes on a real image crop, for visual QC and
+reporting (visual check of individual crown detections).
 
 Usage:
     python scripts/visualize_detections.py --block pilot --aoi outputs/qc/pilot_validation_aoi.gpkg --imagery outputs/qc/pilot_validation_aoi_imagery.tif

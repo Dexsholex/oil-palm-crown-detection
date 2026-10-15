@@ -1,81 +1,136 @@
-# Oil Palm Crown Detection & Counting — Production Pipeline
+# Oil Palm Crown Detection & Counting
 
-RGB orthomosaic -> tiles -> YOLO crown detector -> centroids -> geospatial palm inventory.
-Baseline production workflow per the project brief: bounding-box detection first,
-single class `oil_palm`, everything else is background.
+Detects and counts individual oil palms in drone (UAV) RGB orthomosaics and turns them into a
+GIS-ready palm inventory: one point and one crown box per palm, with confidence, crown area and
+block ID, as GeoPackage and CSV.
+
+RGB orthomosaic -> tiles -> YOLOv8 crown detector -> geo-referenced, de-duplicated detections -> palm inventory
+
+Built for, and run on, a commercial oil palm plantation:
+
+| | |
+|---|---|
+| Area processed | 12,166.6 ha net (26 blocks of ~300 ha) |
+| Palms detected | 718,751 (after removing cross-block double counts) |
+| Imagery | UAV RGB orthomosaics (pilot: 2.13 cm/px) |
+| Model | YOLOv8s, single class `oil_palm`, 1280 px tiles |
+
+Per-block results and the method for resolving overlapping block deliveries are in
+[RESULTS.md](RESULTS.md). Model details, scores and limitations are in
+[MODEL_CARD.md](MODEL_CARD.md).
+
+## What's in this repository
+
+- `scripts/` — the full pipeline: data QC, tiling, annotation sampling, dataset building,
+  training, inference, de-duplication, canopy-height QC, counting accuracy, inventory merge.
+- `models/oil_palm_crown-current/weights/best.pt` — the released model (training run 9).
+- `models/oil_palm_crown-4/weights/best.pt` — an earlier baseline, kept for before/after comparison.
+- `models/oil_palm_crown*/` — training curves, confusion matrices and settings for every training run.
+- `docs/` — methodology, scaling workflow and a step-by-step runbook for new blocks.
+
+The drone imagery, annotations and production outputs belong to the plantation owner and are
+not included.
 
 ## Setup
 
+Python 3.10–3.12 recommended.
+
 ```bash
-.venv\Scripts\pip install -r requirements.txt
+python -m venv .venv
+# Windows: .venv\Scripts\activate    Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-GPU: NVIDIA RTX 4070 Laptop (8GB VRAM) detected. PyTorch installed with CUDA 12.4 wheels.
+A CUDA GPU makes inference much faster. Without one, set `device: cpu` under `model:` in
+`configs/project_config.yaml`.
 
-## Blocks
+## Count palms in your own orthomosaic
 
-Each 300-ha production block is one entry in `configs/blocks.yaml` (rgb/dsm/dtm paths).
-The pilot dev subset is already registered as block `pilot`.
-
-## Workflow
+1. Put your RGB GeoTIFF somewhere on disk (the git-ignored `data/` folder works well).
+2. Register it as a block in `configs/blocks.yaml` and set `crs` in
+   `configs/project_config.yaml` to your imagery's projected CRS.
+3. Run:
 
 ```bash
-# 1. Data QC — CRS, resolution, nodata check
-.venv\Scripts\python scripts\qc_check.py --block pilot
+python scripts/qc_check.py --block <your_block_id>
+python scripts/process_block.py --block <your_block_id> --weights models/oil_palm_crown-current/weights/best.pt
+```
 
-# 2. Tile the orthomosaic (1280px chips, 256px overlap by default)
-.venv\Scripts\python scripts\tile_orthomosaic.py --block pilot
+Results land in `outputs/inventory/<block>_palm_inventory.gpkg` (layers `crowns` and
+`centroids`) and `.csv`. The palm count is the number of rows in `centroids`.
+
+The model was trained mainly on the pilot imagery (2.13 cm/px) of a relatively young
+plantation. Imagery at a very different resolution, or of tall mature palms with heavily overlapping crowns, may need
+resampling or fine-tuning — check a sample visually with `scripts/visualize_detections.py`
+before trusting a count. See [docs/NEW_BLOCK_RUNBOOK.md](docs/NEW_BLOCK_RUNBOOK.md) for the
+full per-block workflow.
+
+## Train on your own data
+
+```bash
+# 1. Data QC — CRS, resolution, nodata
+python scripts/qc_check.py --block pilot
+
+# 2. Tile the orthomosaic (1280 px chips, 256 px overlap by default)
+python scripts/tile_orthomosaic.py --block pilot
 
 # 3. Sample a stratified, representative subset of tiles for manual annotation
-#    (spans greenness / texture / spatial location so weed-only, palm-only and
-#    mixed scenarios all get covered — see brief sections 7 & 9)
-.venv\Scripts\python scripts\sample_tiles_for_annotation.py --block pilot --n-tiles 150
+#    (spans greenness, texture and location so weed-only, palm-only and mixed scenes are covered)
+python scripts/sample_tiles_for_annotation.py --block pilot --n-tiles 150
 
-# 4. Annotate ~1000 crowns manually in annotations/to_label/pilot/
+# 4. Annotate ~1,000 crowns in annotations/to_label/pilot/
 #    (bounding boxes, class "oil_palm", YOLO .txt format — see ANNOTATION.md)
 
-# 5. Build the train/val/test YOLO dataset (split by spatial sector, not random tiles)
-.venv\Scripts\python scripts\build_yolo_dataset.py --block pilot
+# 5. Build the train/val/test dataset (split by spatial sector, not random tiles)
+python scripts/build_yolo_dataset.py --block pilot
 
 # 6. Train
-.venv\Scripts\python scripts\train_yolo.py --epochs 150
+python scripts/train_yolo.py --epochs 150
 
-# 7. Run full-block inference -> merge tile detections -> geospatial inventory
-.venv\Scripts\python scripts\infer_pipeline.py --block pilot --weights models\oil_palm_crown-current\weights\best.pt
+# 7. Full-block inference -> merge tile detections -> geospatial inventory
+python scripts/infer_pipeline.py --block pilot --weights models/oil_palm_crown-current/weights/best.pt
 
-# 8. Counting accuracy against a manually-counted validation area
-.venv\Scripts\python scripts\count_accuracy.py --block pilot --actual-count <known_count>
+# 8. Counting accuracy against a manually counted area
+python scripts/count_accuracy.py --block pilot --actual-count <known_count>
 
-# 9. (Optional, only if error analysis shows it helps) CHM-based QC, requires dsm/dtm in blocks.yaml
-.venv\Scripts\python scripts\chm_qc.py --block pilot
+# 9. (Optional) Canopy-height QC — needs dsm/dtm in blocks.yaml
+python scripts/chm_qc.py --block pilot
 ```
+
+To fine-tune the released model instead of starting from COCO weights, pass
+`--arch models/oil_palm_crown-current/weights/best.pt` to `train_yolo.py`.
 
 ## Outputs
 
 `outputs/inventory/<block>_palm_inventory.gpkg` — two layers:
-- `crowns`: crown bounding-box geometry + Tree_ID, Crown_ID, Confidence, Crown_Area_m2, Block_ID
-- `centroids`: one point per palm (Easting/Northing) — same attributes
+- `crowns`: crown bounding box + Tree_ID, Crown_ID, Confidence, Crown_Area_m2, Block_ID
+- `centroids`: one point per palm (Easting/Northing), same attributes
 
 `outputs/inventory/<block>_palm_inventory.csv` — flat table of the same fields.
 
-All geospatial outputs stay in EPSG:32631 (WGS 84 / UTM zone 31N).
+## Scaling to many blocks
 
-## Scaling to production
+Each new block is: register in `configs/blocks.yaml` -> `scripts/process_block.py` (tile ->
+infer -> geo-dedup -> CHM QC if elevation data is registered). No re-annotation or retraining
+is needed unless a block shows a new failure pattern. `scripts/merge_master_inventory.py`
+folds all processed blocks into one inventory.
 
-Once the pilot model/workflow is validated (>=90% counting accuracy target, ideally >=95%):
-1. Add each new block's rgb/dsm/dtm path to `configs/blocks.yaml` (`dsm`/`dtm`: `null` if
-   not yet delivered for that block).
-2. Run `scripts/process_block.py --block <id> --weights models/oil_palm_crown-current/weights/best.pt`
-   (tile -> infer -> geo-dedup -> CHM QC if elevation data is registered) — no
-   re-annotation or re-training needed per block, unless error analysis reveals a
-   systematic new failure mode (in which case: hard-negative mine, add to training data,
-   retrain, then update `models/oil_palm_crown-current/` to point at the improved
-   checkpoint — see `docs/NEW_BLOCK_RUNBOOK.md`).
-3. Run `scripts/merge_master_inventory.py` to fold every processed block's `centroids`
-   layer into one plantation-wide inventory GeoPackage/CSV.
+If blocks overlap — common when imagery is delivered incrementally without a shared boundary
+file — summing per-block counts double-counts palms. In the production run, naive summing gave
+1,021,163 palms; resolving the overlap gave 718,751 (a 29.6% correction). The method is in
+[RESULTS.md](RESULTS.md#cross-block-overlap-resolution-methodology-note).
 
-As of this writing the pipeline has processed 26 production blocks — 12,166.6 ha net
-coverage, 718,751 detected palms after cross-block overlap resolution — on
-`oil_palm_crown-current`, the model retrained on dense-canopy and young-palm failure
-cases found during production rollout. See [RESULTS.md](RESULTS.md) for the full
-per-block breakdown and methodology notes.
+## Licence
+
+AGPL-3.0 — see [LICENSE](LICENSE). The detector is built on
+[Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics), which is itself AGPL-3.0.
+
+## Citation
+
+If you use this code or model, please cite it — see [CITATION.cff](CITATION.cff), or use
+GitHub's "Cite this repository" button.
+
+## Author
+
+Oluwasola Oyinloye — [GitHub @Dexsholex](https://github.com/Dexsholex). Model released with the
+permission of the plantation owner.

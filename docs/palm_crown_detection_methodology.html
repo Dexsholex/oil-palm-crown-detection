@@ -291,9 +291,9 @@
 <div class="sheet">
 
   <div class="head">
-    <span class="eyebrow">Methodology Briefing — Client Reference</span>
+    <span class="eyebrow">Methodology</span>
     <h1>Palm Crown Detection &amp; Counting</h1>
-    <p class="sub">How individual oil palm crowns are found, located, and counted from UAV orthomosaic imagery — the approach, the reasoning, and the questions likely to come up.</p>
+    <p class="sub">How individual oil palm crowns are found, located, and counted from UAV orthomosaic imagery — the approach, the reasoning, and common questions.</p>
     <div class="stat-strip">
       <div class="stat"><div class="k">Pilot area</div><div class="v">~85 ha</div></div>
       <div class="stat"><div class="k">GSD</div><div class="v">2.13 cm/px</div></div>
@@ -336,7 +336,7 @@
       <div class="step" style="padding-bottom: 0.6rem;">
         <div style="display:flex; gap:0.6rem; align-items:baseline;">
           <span style="color: var(--gold); font-family:'IBM Plex Mono',monospace; font-size:0.8rem;">02</span>
-          <p style="margin:0;"><strong>Inference speed at scale</strong> — tens of thousands of image tiles across 6,000 ha need processing; YOLO is built for exactly that throughput.</p>
+          <p style="margin:0;"><strong>Inference speed at scale</strong> — tens of thousands of image tiles across 12,166.6 ha (26 blocks) need processing; YOLO is built for exactly that throughput.</p>
         </div>
       </div>
       <div class="step" style="padding-bottom: 0.6rem;">
@@ -396,7 +396,7 @@
         <td class="num">2.75 m</td><td class="num">3.81 m</td><td class="num">5.53 m</td>
       </tr></tbody>
     </table>
-    <p style="font-size: 0.85rem; color: var(--ink-muted);">(Short for oil palm broadly — consistent with a young plantation, not mature trees. Worth confirming with the client directly.)</p>
+    <p style="font-size: 0.85rem; color: var(--ink-muted);">(Short for oil palm broadly — consistent with a young plantation rather than mature trees. Performance on tall, mature palms with heavily overlapping crowns has not been measured.)</p>
     <div class="caveat">
       <span class="lbl">The honest limit</span>
       CHM measures height only, not shape. It reliably rejects things <em>too short</em> to be a real palm (a weed clump at 0.3 m). It <strong>cannot</strong> tell a young palm apart from a light pole or another tree species at the same height — height alone doesn't encode what an object looks like. That disambiguation is done primarily by the model's learned <em>visual</em> pattern (crown shape, texture, color from the RGB training data), with CHM as a secondary plausibility filter and human visual QC as the final backstop.
@@ -404,8 +404,8 @@
   </section>
 
   <section>
-    <span class="section-label">06 — Anticipated questions</span>
-    <h2 class="title">Talking points</h2>
+    <span class="section-label">06 — Common questions</span>
+    <h2 class="title">FAQ</h2>
     <div class="qa">
       <div class="qa-item">
         <div class="q">Did you use AI or machine learning?</div>
@@ -417,7 +417,7 @@
       </div>
       <div class="qa-item">
         <div class="q">How do you know the count is accurate?</div>
-        <p class="a">Reported honestly via standard detection metrics (precision, recall, mAP) on a spatially held-out test set, plus counting accuracy against a manually, independently counted reference area — not a self-reported figure.</p>
+        <p class="a">Standard detection metrics (precision, recall, mAP) on a spatially separate validation split are reported in MODEL_CARD.md. Counting accuracy against manually counted reference areas is being compiled and will be added there.</p>
       </div>
       <div class="qa-item">
         <div class="q">How does this handle the rest of the plantation?</div>

@@ -1,7 +1,7 @@
 # Global project settings for the oil palm crown detection pipeline.
 # Per-block data paths live in blocks.yaml (keeps this file stable as blocks are added).
 
-crs: "EPSG:32631"          # WGS 84 / UTM zone 31N — all geospatial outputs stay in this CRS
+crs: "EPSG:32631"          # WGS 84 / UTM zone 31N — all geospatial outputs stay in this CRS; set to your imagery's projected CRS
 classes:
   - oil_palm
 
@@ -15,9 +15,9 @@ annotation:
   format: yolo               # one .txt per image, class 0 = oil_palm
 
 model:
-  arch: models/yolov8m.pt    # starting checkpoint (COCO-pretrained), fine-tuned on crowns; pre-downloaded, path relative to project root
+  arch: yolov8s.pt           # starting checkpoint (COCO-pretrained) the production model was fine-tuned from; downloaded automatically by ultralytics
   imgsz: 1280
-  device: 0                  # CUDA device index (RTX 4070 laptop, 8GB VRAM)
+  device: 0                  # CUDA device index (trained on an RTX 4070 laptop, 8GB VRAM); set to cpu if there's no NVIDIA GPU
   batch: 8                   # conservative for 8GB VRAM at imgsz 1280; lower if OOM
 
 inference:

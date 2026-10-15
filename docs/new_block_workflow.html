@@ -135,13 +135,13 @@
 <div class="sheet">
 
   <div class="head">
-    <span class="eyebrow">Scaling Briefing — Client Reference</span>
+    <span class="eyebrow">Scaling Workflow</span>
     <h1>From One Block to the Whole Plantation</h1>
     <p class="sub">How each new 300 ha orthomosaic — as it comes off the drone — flows through the already-trained model to become a geolocated palm count, without repeating the annotation or training work.</p>
     <div class="stat-strip">
       <div class="stat"><div class="k">Pilot area</div><div class="v">~85 ha</div></div>
-      <div class="stat"><div class="k">Full plantation</div><div class="v">~6,000 ha</div></div>
-      <div class="stat"><div class="k">Remaining blocks</div><div class="v">~19</div></div>
+      <div class="stat"><div class="k">Processed (net)</div><div class="v">12,166.6 ha</div></div>
+      <div class="stat"><div class="k">Blocks processed</div><div class="v">26</div></div>
       <div class="stat"><div class="k">Model retrained per block</div><div class="v">No</div></div>
     </div>
   </div>
@@ -154,7 +154,7 @@
       <div class="phase-once">
         <span class="phase-label">Done once — pilot only</span>
         <h3>Annotate, train, validate</h3>
-        <p>~1,200 hand-labeled crowns → train the detector → verify against a manual count. This is the phase we just completed.</p>
+        <p>~1,200 hand-labeled crowns → train the detector → verify against a manual count.</p>
       </div>
       <div class="funnel-arrow">↓ produces a frozen, reusable model ↓</div>
       <div class="phase-repeat">
@@ -169,7 +169,7 @@
     <span class="section-label">02 — What happens for each new block</span>
     <h2 class="title">Five steps, none of them manual model work</h2>
     <div class="pipeline">
-      <div class="step" data-n="1"><h3>Data arrives</h3><span class="tag">from the client</span><p>RGB orthomosaic for the new ~300 ha block, plus DSM/DTM if available from that flight — same format as the pilot.</p></div>
+      <div class="step" data-n="1"><h3>Data arrives</h3><span class="tag">input</span><p>RGB orthomosaic for the new ~300 ha block, plus DSM/DTM if available from that flight — same format as the pilot.</p></div>
       <div class="step" data-n="2"><h3>Register the block</h3><span class="tag">~1 minute</span><p>Point the pipeline at the new file paths. No annotation, no configuration beyond this.</p></div>
       <div class="step" data-n="3"><h3>Run the frozen model</h3><span class="tag">automated</span><p>Tile the orthomosaic → detect every crown → convert to real GPS coordinates → remove tile-boundary duplicates. Identical process to the pilot, same model weights.</p></div>
       <div class="step" data-n="4"><h3>Block inventory out</h3><span class="tag">automated</span><p>A GIS-ready file for that block: palm count, GPS locations, confidence scores, crown geometry.</p></div>
@@ -179,7 +179,7 @@
 
   <section>
     <span class="section-label">03 — The repeating loop</span>
-    <h2 class="title">Same model, every block, ×19 more times</h2>
+    <h2 class="title">Same model, every block — 25 more times after the pilot</h2>
     <div class="loop-wrap">
       <div class="loop-node"><div class="box">New block<br>orthomosaic</div>in from the drone</div>
       <div class="loop-arrow">→</div>
@@ -188,7 +188,7 @@
       <div class="loop-node"><div class="box">Block<br>inventory</div>count + GPS locations</div>
       <div class="loop-arrow">→</div>
       <div class="loop-node"><div class="box">Master<br>inventory</div>whole-plantation map</div>
-      <div class="loop-repeat">repeats for each of the ~19 remaining blocks as the drone data arrives</div>
+      <div class="loop-repeat">repeated for each of the 25 production blocks after the pilot, as the drone data arrived</div>
     </div>
   </section>
 
@@ -197,20 +197,20 @@
     <h2 class="title">When we'd actually touch the model again</h2>
     <div class="caveat">
       <span class="lbl">Not the routine case</span>
-      If a new block shows something genuinely unfamiliar — a weed type, terrain, or lighting condition the pilot never saw — that specific pattern gets added to the training data and the model gets a targeted update. This is flagged during our own QC pass on each block's results, not something the client needs to watch for. It's the exception; running the existing model is the rule.
+      If a new block shows something genuinely unfamiliar — a weed type, terrain, or lighting condition the pilot never saw — that specific pattern gets added to the training data and the model gets a targeted update. This is caught during the QC pass on each block's results. In the production run it happened for two patterns — dense mature canopy and newly planted palms were under-detected — so examples of both were annotated and the model retrained (the released checkpoint, <code>oil_palm_crown-9</code>). It's the exception; running the existing model is the rule.
     </div>
   </section>
 
   <section>
-    <span class="section-label">05 — Anticipated questions</span>
-    <h2 class="title">Talking points</h2>
+    <span class="section-label">05 — Common questions</span>
+    <h2 class="title">FAQ</h2>
     <div class="qa">
       <div class="qa-item">
         <div class="q">Do you need to re-annotate or retrain for every new block?</div>
-        <p class="a">No — that's the whole point of the pilot phase. The model is built once and reused unchanged across all ~19 remaining blocks.</p>
+        <p class="a">No — that's the whole point of the pilot phase. The model was built once and reused across all 25 production blocks; it was retrained only when rollout exposed the dense-canopy and young-palm misses described above.</p>
       </div>
       <div class="qa-item">
-        <div class="q">What do you need from us for each new block?</div>
+        <div class="q">What input does each new block need?</div>
         <p class="a">Just the RGB orthomosaic. DSM/DTM are a helpful bonus for extra quality-control, not required.</p>
       </div>
       <div class="qa-item">
@@ -225,9 +225,9 @@
   </section>
 
   <footer>
-    <span>Model trained once on the pilot block</span>
-    <span>Reused unchanged across ~19 remaining blocks</span>
-    <span>Master inventory grows as each block completes</span>
+    <span>Model trained on the pilot, refined once during rollout</span>
+    <span>Reused across 25 production blocks</span>
+    <span>12,166.6 ha · 718,751 palms in the master inventory</span>
   </footer>
 
 </div>

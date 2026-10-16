@@ -37,8 +37,8 @@ will be used without checking a sample against a manual count.
 
 ## Training data
 
-- UAV RGB orthomosaics from one commercial oil palm plantation. The imagery and labels are
-  proprietary and are not released.
+- UAV RGB orthomosaics from one commercial oil palm plantation in West Africa. The imagery
+  and labels are proprietary and are not released.
 - **Pilot block:** ~85 ha at 2.13 cm/px. 150 tiles (1280 px, 256 px overlap) sampled to cover
   dense/sparse palms, weeds, roads and bare soil; 1,226 crowns hand-annotated as boxes.
 - **Rollout additions:** targeted examples of dense mature canopy and newly planted palms from
@@ -84,7 +84,7 @@ double counts. Per-block results are in [RESULTS.md](RESULTS.md).
 
 ## Limitations
 
-- Trained on one plantation in one region, with mostly young palms. Performance on other
+- Trained on one plantation in West Africa, with mostly young palms. Performance on other
   plantations, drones, seasons, or tall mature palms with heavily overlapping crowns has not
   been measured.
 - Sensitive to resolution: resample imagery far from ~2 cm/px, or fine-tune.

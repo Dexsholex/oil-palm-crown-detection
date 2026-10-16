@@ -6,7 +6,7 @@ block ID, as GeoPackage and CSV.
 
 RGB orthomosaic -> tiles -> YOLOv8 crown detector -> geo-referenced, de-duplicated detections -> palm inventory
 
-Built for, and run on, a commercial oil palm plantation:
+Built for, and run on, a commercial oil palm plantation in West Africa:
 
 | | |
 |---|---|

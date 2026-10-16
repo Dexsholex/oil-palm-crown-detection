@@ -10,6 +10,9 @@ annotations/yolo_dataset/
 runs/
 data/
 
+# Release builds (ONNX export, Hugging Face upload folder) — published on Hugging Face, not in git
+release/
+
 # Client deliverables — proprietary detection results, kept out of the public repo
 outputs/
 

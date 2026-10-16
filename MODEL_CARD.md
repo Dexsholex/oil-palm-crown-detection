@@ -103,6 +103,11 @@ removing duplicates where tiles overlap:
 python scripts/process_block.py --block <block_id> --weights models/oil_palm_crown-current/weights/best.pt
 ```
 
+For QGIS (Deepness plugin) or ONNX Runtime, export with `python scripts/export_onnx.py`. The
+ONNX model takes `1×3×1280×1280` RGB scaled 0–1 and returns `1×5×33600` (box centre x, y,
+width, height, palm score) before non-max suppression; it matches the PyTorch model to within
+0.001 px.
+
 For a single image tile:
 
 ```python

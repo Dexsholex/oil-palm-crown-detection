@@ -65,6 +65,19 @@ resampling or fine-tuning — check a sample visually with `scripts/visualize_de
 before trusting a count. See [docs/NEW_BLOCK_RUNBOOK.md](docs/NEW_BLOCK_RUNBOOK.md) for the
 full per-block workflow.
 
+## Use in QGIS (no code)
+
+Export the model to ONNX — the file carries the settings the
+[Deepness](https://plugins.qgis.org/plugins/deepness/) QGIS plugin needs (resolution, tile
+size, overlap, thresholds):
+
+```bash
+python scripts/export_onnx.py    # writes release/oil_palm_crown.onnx
+```
+
+In QGIS, install the Deepness plugin, choose **Detector**, select the `.onnx` file, load its
+default parameters and run it over your orthomosaic. If asked for a batch size, use 1.
+
 ## Train on your own data
 
 ```bash

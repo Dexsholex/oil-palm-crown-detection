@@ -14,18 +14,31 @@ Built for, and run on, a commercial oil palm plantation in West Africa:
 | Palms detected | 718,751 (after removing cross-block double counts) |
 | Imagery | UAV RGB orthomosaics (pilot: 2.13 cm/px) |
 | Model | YOLOv8s, single class `oil_palm`, 1280 px tiles |
+| Training data | 4,041 hand-labelled crowns on 435 tiles from two blocks |
+
+How well it works, on 79 held-out test tiles (716 hand-labelled palms) from ground the model
+never trained on:
+
+| | Released model | Earlier baseline |
+|---|---|---|
+| Precision (share of detections that are real palms) | 0.845 | 0.727 |
+| Recall (share of real palms found) | 0.774 | 0.637 |
+| mAP@0.5 | 0.844 | 0.698 |
+| Palm count vs. hand count, tile interiors | 519 vs 518 (+0.2%) | 454 vs 518 (−12.4%) |
 
 Per-block results and the method for resolving overlapping block deliveries are in
-[RESULTS.md](RESULTS.md). Model details, scores and limitations are in
-[MODEL_CARD.md](MODEL_CARD.md).
+[RESULTS.md](RESULTS.md). Model details, the full evaluation and limitations are in
+[MODEL_CARD.md](MODEL_CARD.md) and [evaluation/](evaluation/).
 
 ## What's in this repository
 
 - `scripts/` — the full pipeline: data QC, tiling, annotation sampling, dataset building,
-  training, inference, de-duplication, canopy-height QC, counting accuracy, inventory merge.
+  training, inference, de-duplication, canopy-height QC, counting accuracy, inventory merge,
+  test-split evaluation and ONNX export.
 - `models/oil_palm_crown-current/weights/best.pt` — the released model (training run 9).
-- `models/oil_palm_crown-4/weights/best.pt` — an earlier baseline, kept for before/after comparison.
+- `models/oil_palm_crown-4/weights/best.pt` — the earlier baseline (run 4), kept for before/after comparison.
 - `models/oil_palm_crown*/` — training curves, confusion matrices and settings for every training run.
+- `evaluation/` — test-split results and per-tile hand vs. model counts.
 - `docs/` — methodology, scaling workflow and a step-by-step runbook for new blocks.
 
 The drone imagery, annotations and production outputs belong to the plantation owner and are
@@ -33,7 +46,8 @@ not included.
 
 ## Setup
 
-Python 3.10–3.12 recommended.
+Tested with Python 3.14, PyTorch 2.14 and Ultralytics 8.4 (the model was trained with
+Ultralytics 8.4.122); Python 3.10 or newer should work.
 
 ```bash
 python -m venv .venv
@@ -91,14 +105,17 @@ python scripts/tile_orthomosaic.py --block pilot
 #    (spans greenness, texture and location so weed-only, palm-only and mixed scenes are covered)
 python scripts/sample_tiles_for_annotation.py --block pilot --n-tiles 150
 
-# 4. Annotate ~1,000 crowns in annotations/to_label/pilot/
-#    (bounding boxes, class "oil_palm", YOLO .txt format — see ANNOTATION.md)
+# 4. Annotate crowns in annotations/to_label/pilot/ — at least ~1,000 to start; the released
+#    model used 4,041 (bounding boxes, class "oil_palm", YOLO .txt format — see ANNOTATION.md)
 
 # 5. Build the train/val/test dataset (split by spatial sector, not random tiles)
 python scripts/build_yolo_dataset.py --block pilot
 
 # 6. Train
 python scripts/train_yolo.py --epochs 150
+
+# 6b. Score on the held-out test split: detection metrics + hand vs. model counts per tile
+python scripts/evaluate_test_split.py --weights models/oil_palm_crown/weights/best.pt
 
 # 7. Full-block inference -> merge tile detections -> geospatial inventory
 python scripts/infer_pipeline.py --block pilot --weights models/oil_palm_crown-current/weights/best.pt

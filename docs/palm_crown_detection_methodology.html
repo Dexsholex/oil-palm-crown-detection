@@ -298,7 +298,7 @@
       <div class="stat"><div class="k">Pilot area</div><div class="v">~85 ha</div></div>
       <div class="stat"><div class="k">GSD</div><div class="v">2.13 cm/px</div></div>
       <div class="stat"><div class="k">CRS</div><div class="v">EPSG:32631</div></div>
-      <div class="stat"><div class="k">Ground truth</div><div class="v">1,226 crowns</div></div>
+      <div class="stat"><div class="k">Ground truth</div><div class="v">4,041 crowns</div></div>
       <div class="stat"><div class="k">Detector</div><div class="v">YOLOv8</div></div>
     </div>
   </div>
@@ -314,7 +314,7 @@
       </div>
       <div class="gcard">
         <h3>Transfer learning</h3>
-        <p>The model starts from weights already trained on millions of general images, then gets fine-tuned on our ~1,200 crown examples — not trained from zero.</p>
+        <p>The model starts from weights already trained on millions of general images, then gets fine-tuned on our hand-labelled crown examples (2,898 in the training split) — not trained from zero.</p>
       </div>
       <div class="gcard">
         <h3>Object detection vs. classification</h3>
@@ -342,7 +342,7 @@
       <div class="step" style="padding-bottom: 0.6rem;">
         <div style="display:flex; gap:0.6rem; align-items:baseline;">
           <span style="color: var(--gold); font-family:'IBM Plex Mono',monospace; font-size:0.8rem;">03</span>
-          <p style="margin:0;"><strong>Works with modest training data</strong> — transfer learning means ~1,200 annotated crowns is enough; training from scratch would need far more.</p>
+          <p style="margin:0;"><strong>Works with modest training data</strong> — transfer learning means a few thousand annotated crowns (4,041 on 435 tiles here) is enough; training from scratch would need far more.</p>
         </div>
       </div>
       <div class="step" style="padding-bottom: 0.6rem;">
@@ -388,7 +388,7 @@
   <section>
     <span class="section-label">05 — On the canopy-height (CHM) check</span>
     <h2 class="title">Height confirms plausibility — it doesn't confirm identity</h2>
-    <p>Sampling the canopy height model (DSM − DTM) at all 1,226 confirmed crown locations gives this plantation's real, measured height range — not a textbook figure:</p>
+    <p>Sampling the canopy height model (DSM − DTM) at the 1,226 crowns from the first pilot annotation batch gives this plantation's real, measured height range — not a textbook figure:</p>
     <table style="margin: 0.7rem 0;">
       <thead><tr><th>p5</th><th>p25</th><th>Median</th><th>p75</th><th>p95</th><th>Max</th></tr></thead>
       <tbody><tr>
@@ -417,7 +417,7 @@
       </div>
       <div class="qa-item">
         <div class="q">How do you know the count is accurate?</div>
-        <p class="a">Standard detection metrics (precision, recall, mAP) on a spatially separate validation split are reported in MODEL_CARD.md. Counting accuracy against manually counted reference areas is being compiled and will be added there.</p>
+        <p class="a">On 79 test tiles from ground the model never trained on (716 hand-labelled palms), 84.5% of detections are real palms and 77.4% of palms are found. Counting the interior of each tile — the part a block run keeps once overlapping tiles are merged — the model counted 519 palms against 518 by hand. Details and per-tile numbers are in MODEL_CARD.md and evaluation/.</p>
       </div>
       <div class="qa-item">
         <div class="q">How does this handle the rest of the plantation?</div>

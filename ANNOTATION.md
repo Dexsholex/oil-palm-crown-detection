@@ -1,7 +1,8 @@
 # Annotating oil palm crowns
 
-The released model was trained on ~1,200 hand-drawn crown boxes from 150 stratified tiles of
-the pilot block, plus targeted dense-canopy and young-palm examples added during rollout.
+The released model was trained on 4,041 hand-drawn crown boxes on 435 tiles: 2,541 boxes on
+286 stratified tiles of the pilot block (two annotation batches), plus 1,500 boxes on 149
+tiles of dense mature canopy and newly planted palms from block_003, added during rollout.
 This is how they were made, so you can annotate your own imagery the same way.
 
 ## Tool
@@ -28,8 +29,11 @@ sampled by `scripts/sample_tiles_for_annotation.py` (in `annotations/to_label/<b
    palms in weeds vs. clean ground, shadowed/partly occluded palms, and plenty of pure
    weed/bush/road/bare-soil frames.
 5. No fixed per-tile box count — box whatever is actually visible, including zero. Aim for
-   ~1,000 boxes in total; if you're well short after all sampled tiles, sample more tiles
-   to top up.
+   at least ~1,000 boxes to start; if you're well short after all sampled tiles, sample more
+   tiles to top up.
+6. Keep a label file for every tile you reviewed, even an empty one. `build_yolo_dataset.py`
+   treats a tile with an empty `.txt` as a background example, but a tile with no `.txt` at all
+   as not yet annotated, and leaves it out.
 
 ## Getting annotations back into the pipeline
 

@@ -39,15 +39,25 @@ will be used without checking a sample against a manual count.
 
 - UAV RGB orthomosaics from one commercial oil palm plantation in West Africa. The imagery
   and labels are proprietary and are not released.
-- **Pilot block:** ~85 ha at 2.13 cm/px. 150 tiles (1280 px, 256 px overlap) sampled to cover
-  dense/sparse palms, weeds, roads and bare soil; 1,226 crowns hand-annotated as boxes.
-- **Rollout additions:** targeted examples of dense mature canopy and newly planted palms from
-  a second block (block_003), added after those patterns were under-detected in production.
-  The number of added boxes was not recorded in this repository.
-- **Split:** train/val/test by spatial sector, not by random tiles, so validation tiles come
-  from ground the model did not train on.
-- The plantation is young: canopy height at the 1,226 pilot crowns has a median of 2.33 m
-  (5th–95th percentile 0.92–3.81 m).
+- 1280 × 1280 px tiles (256 px overlap), hand-annotated with one box per visible crown:
+
+  | Source | Annotated tiles | Crown boxes |
+  |---|---|---|
+  | Pilot block (~85 ha, 2.13 cm/px), two stratified annotation batches covering dense/sparse palms, weeds, roads and bare soil | 286 | 2,541 |
+  | block_003, targeted dense mature canopy and newly planted palms, added after those were under-detected in production | 149 | 1,500 |
+  | **Total** | **435** | **4,041** |
+
+- **Split:** 70/15/15 by spatial sector (a deterministic hash of each tile's map sector), not
+  by random tiles, so validation and test tiles come from ground the model did not train on:
+
+  | Split | Tiles (pilot + block_003) | Crown boxes |
+  |---|---|---|
+  | Train | 313 (214 + 99) | 2,898 |
+  | Validation | 43 (21 + 22) | 427 |
+  | Test | 79 (51 + 28) | 716 |
+
+- The plantation is young: canopy height at 1,226 crowns from the first pilot annotation batch
+  has a median of 2.33 m (5th–95th percentile 0.92–3.81 m).
 
 ## Training procedure
 
@@ -62,22 +72,49 @@ will be used without checking a sample against a manual count.
 
 ## Evaluation
 
-Validation split, best epoch of run 9:
+**Held-out test split** (79 tiles, 716 labelled crowns, never used for training or for picking
+the checkpoint), scored with Ultralytics `val`:
 
-| Precision | Recall | mAP@0.5 | mAP@0.5:0.95 |
-|---|---|---|---|
-| 0.837 | 0.746 | 0.839 | 0.362 |
+| Model | Precision | Recall | mAP@0.5 | mAP@0.5:0.95 |
+|---|---|---|---|---|
+| Released model (run 9) | **0.845** | **0.774** | **0.844** | **0.350** |
+| Earlier baseline (run 4) | 0.727 | 0.637 | 0.698 | 0.279 |
 
 How to read these:
-- About 84% of detections are real palms, and the model finds about 3 in 4 annotated palms
-  in the validation tiles.
-- The validation split was also used to pick the best epoch, so these numbers are slightly
-  optimistic.
-- They are box-matching scores, not counting accuracy. The low mAP@0.5:0.95 mostly reflects
-  how tightly boxes fit crown edges, which matters less for counting.
+- About 85% of detections are real palms, and the model finds about 77 of every 100 labelled
+  palms. Precision and recall both rose over the baseline, so the gain is not a trade-off.
+- Ultralytics reports precision and recall at the confidence threshold that maximises F1, not
+  at the pipeline's 0.25 — see counting accuracy below for the pipeline setting.
+- The low mAP@0.5:0.95 mostly reflects how tightly boxes fit crown edges, which matters less
+  for counting.
+- For reference, the validation split at the best epoch gave precision 0.837, recall 0.746,
+  mAP@0.5 0.839, mAP@0.5:0.95 0.362.
+- Reproduce with `python scripts/evaluate_test_split.py --weights models/oil_palm_crown-current/weights/best.pt`
+  (needs the labelled tiles, which are not public).
 
-**Counting accuracy** (model count vs. manual count on reference images): being compiled —
-this section will be updated.
+**Counting accuracy** — model count vs. hand count on the same 79 held-out test tiles, at the
+pipeline's settings (confidence 0.25, NMS IoU 0.45):
+
+| Counted region | Hand count | Model count | Difference |
+|---|---|---|---|
+| Tile interior (box centre more than 128 px from the border) | 518 | 519 | **+0.2%** |
+| Whole tile, including palms cut off by the border | 716 | 894 | +24.9% |
+
+- The interior is the fair comparison for a block run: tiles overlap by 256 px, so a palm cut
+  off at one tile's border is seen whole in the next tile, and duplicates are merged. The
+  interior is what each tile contributes.
+- The whole-tile overcount comes from partial crowns at the border, which the annotators mostly
+  did not box but the model detects: 206 of the 301 unmatched detections touch the tile edge.
+- The interior count is close partly because errors cancel: roughly 100 labelled palms away
+  from the edges are missed, and a similar number of detections there have no matching label.
+  Totals over many palms are reliable; individual detections are not all correct.
+- By block (interior): pilot 321 vs 311 by hand (+3.2%), block_003 198 vs 207 (−4.3%); mean
+  absolute error 0.57 palms per tile.
+- The baseline (run 4) counted 454 interior palms against 518 (−12.4%), missing about 31% on
+  block_003's dense canopy and young palms. Retraining on those cases fixed most of it.
+- On the 43 validation tiles the interior count was 304 against 317 by hand (−4.1%).
+- These are tile-level checks on held-out ground, not a field count over a whole block.
+- Per-tile numbers: [evaluation/](evaluation/).
 
 **Production run:** 26 blocks, 12,166.6 ha net, 718,751 palms after removing cross-block
 double counts. Per-block results are in [RESULTS.md](RESULTS.md).
@@ -91,6 +128,8 @@ double counts. Per-block results are in [RESULTS.md](RESULTS.md).
 - Known weak spots during rollout were dense mature canopy and very small, newly planted
   palms. Run 9 was trained to reduce both, but they remain the most likely sources of missed
   palms.
+- Count accuracy relies partly on misses and false detections cancelling out (see Evaluation).
+  Check a sample visually before relying on counts for a small area.
 - Other palm species and similar-looking vegetation were not specifically tested.
 - Boxes, not crown outlines: touching crowns can occasionally merge into one detection.
 

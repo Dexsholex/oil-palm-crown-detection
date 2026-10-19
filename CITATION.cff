@@ -4,8 +4,10 @@ type: software
 title: "Oil Palm Crown Detection & Counting from UAV RGB Orthomosaics"
 abstract: >-
   A YOLOv8s single-class detector and geospatial pipeline that detects and counts individual
-  oil palms in drone RGB orthomosaics and produces a GIS-ready palm inventory. Used in
-  production to count 718,751 palms over 12,166.6 ha.
+  oil palms in drone RGB orthomosaics and produces a GIS-ready palm inventory. Trained on
+  4,041 hand-labelled crowns; on held-out test tiles it reaches precision 0.845 and recall
+  0.774, and its tile-interior palm count is within 0.2% of the hand count. Used in
+  production to count 718,751 palms over 12,166.6 ha in West Africa.
 authors:
   - given-names: Oluwasola
     family-names: Oyinloye

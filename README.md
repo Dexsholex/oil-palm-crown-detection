@@ -73,10 +73,12 @@ python scripts/process_block.py --block <your_block_id> --weights models/oil_pal
 Results land in `outputs/inventory/<block>_palm_inventory.gpkg` (layers `crowns` and
 `centroids`) and `.csv`. The palm count is the number of rows in `centroids`.
 
-The model was trained mainly on the pilot imagery (2.13 cm/px) of a relatively young
-plantation. Imagery at a very different resolution, or of tall mature palms with heavily overlapping crowns, may need
-resampling or fine-tuning — check a sample visually with `scripts/visualize_detections.py`
-before trusting a count. See [docs/NEW_BLOCK_RUNBOOK.md](docs/NEW_BLOCK_RUNBOOK.md) for the
+The model was trained on orthomosaics (about 2 cm/px) of a relatively young plantation.
+Imagery at a very different resolution may need resampling, and imagery of tall mature palms
+with heavily overlapping crowns needs fine-tuning: on an independent set of close-up photos of
+mature palms from Peru it found at best about half the palms (see
+[evaluation/](evaluation/#outside-imagery-an-independent-dataset-from-peru)). Check a sample
+visually with `scripts/visualize_detections.py` before trusting a count. See [docs/NEW_BLOCK_RUNBOOK.md](docs/NEW_BLOCK_RUNBOOK.md) for the
 full per-block workflow.
 
 ## Use in QGIS (no code)

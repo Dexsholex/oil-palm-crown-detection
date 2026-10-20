@@ -60,6 +60,46 @@ What this shows:
 These are tile-level checks on held-out ground. No field count over a whole block has been
 done.
 
+## Outside imagery: an independent dataset from Peru
+
+To see how the model does away from the plantation it was trained on, it was run on
+*Oil Palm Tree Detection for Anomaly Identification* (Dominguez Meza & Rituay, Mendeley Data,
+[doi:10.17632/nh7d23dgnw.1](https://doi.org/10.17632/nh7d23dgnw.1), CC BY 4.0):
+
+- 424 straight-down drone photos (800 × 600 px) from a DJI Phantom 4 Multispectral flown at
+  17–30 m, by researchers at Peruvian universities. None were used in training.
+- 549 labelled palms (the dataset's healthy and anomalous classes counted together).
+- Very different from the training tiles: close-ups of **mature palms with overlapping crowns**
+  that fill the frame (median box 491 px wide, against roughly 150–200 px in the training
+  tiles). Labels cover the full frond spread of the main palms; palms cut off at the photo
+  edge are mostly unlabelled.
+
+Scored at confidence 0.25, at several input sizes (a smaller input shrinks the palms towards the
+size the model was trained on):
+
+| Input size | Palm width as seen by the model | mAP@0.5 (strict box match) | Labelled palms found (detection centre inside the label) | Detections centred on a labelled palm | Photos with no detection |
+|---|---|---|---|---|---|
+| 800 px (native) | ~490 px | 0.002 | — | — | — |
+| 640 px | ~390 px | 0.005 | 33% | 47% | 184 of 424 |
+| 256 px | ~160 px | 0.049 | 53% | 71% | 115 of 424 |
+
+Strict mAP at 480 px and 352 px was 0.004 and 0.009.
+
+What this shows:
+
+- **The model does not transfer to close-up imagery of mature, overlapping palms.** Even with
+  the photos shrunk so palms match the training size, it finds only about half of them,
+  against 77–83% on the held-out tiles from its own plantation.
+- Palm size on screen matters a lot: shrinking the input from 640 to 256 px raised the share
+  of palms found from 33% to 53%.
+- The strict scores understate it somewhat: where the model does find a palm, its box often
+  covers the crown core rather than the full frond spread, and in the photos checked by eye,
+  several of its "false" detections were real palms at the photo edge that the dataset did not
+  label.
+- To use the model on imagery like this, fine-tune it on a few hundred labelled examples of
+  that imagery first. Plantations imaged the same way as the training data (orthomosaics at
+  about 2 cm/px, young palms) are still untested outside the original site.
+
 ## Files
 
 - `test_counts_final.csv`, `test_counts_baseline.csv` — one row per test tile: `manual_count`

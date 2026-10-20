@@ -121,9 +121,12 @@ double counts. Per-block results are in [RESULTS.md](RESULTS.md).
 
 ## Limitations
 
-- Trained on one plantation in West Africa, with mostly young palms. Performance on other
-  plantations, drones, seasons, or tall mature palms with heavily overlapping crowns has not
-  been measured.
+- Trained on one plantation in West Africa, with mostly young palms. It **does not transfer to
+  close-up drone photos of mature palms with overlapping crowns**: on an independent dataset
+  from Peru (424 photos, 549 palms) it found at best about half the palms, and strict
+  mAP@0.5 stayed below 0.05 — see [evaluation/](evaluation/). Fine-tune before using it on
+  imagery like that. Other plantations imaged like the training data (orthomosaics at about
+  2 cm/px, young palms) remain untested.
 - Sensitive to resolution: resample imagery far from ~2 cm/px, or fine-tune.
 - Known weak spots during rollout were dense mature canopy and very small, newly planted
   palms. Run 9 was trained to reduce both, but they remain the most likely sources of missed

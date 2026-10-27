@@ -28,7 +28,9 @@ never trained on:
 
 Per-block results and the method for resolving overlapping block deliveries are in
 [RESULTS.md](RESULTS.md). Model details, the full evaluation and limitations are in
-[MODEL_CARD.md](MODEL_CARD.md) and [evaluation/](evaluation/).
+[MODEL_CARD.md](MODEL_CARD.md) and [evaluation/](evaluation/). The model files (PyTorch and
+ONNX) can also be downloaded from
+[Hugging Face](https://huggingface.co/dexsholex/oil-palm-crown-detector).
 
 ## What's in this repository
 
@@ -83,9 +85,10 @@ full per-block workflow.
 
 ## Use in QGIS (no code)
 
-Export the model to ONNX — the file carries the settings the
-[Deepness](https://plugins.qgis.org/plugins/deepness/) QGIS plugin needs (resolution, tile
-size, overlap, thresholds):
+Download `oil_palm_crown.onnx` from the
+[Hugging Face model page](https://huggingface.co/dexsholex/oil-palm-crown-detector). The file
+carries the settings the [Deepness](https://plugins.qgis.org/plugins/deepness/) QGIS plugin
+needs (resolution, tile size, overlap, thresholds). To build it yourself instead:
 
 ```bash
 python scripts/export_onnx.py    # writes release/oil_palm_crown.onnx
@@ -151,6 +154,12 @@ If blocks overlap — common when imagery is delivered incrementally without a s
 file — summing per-block counts double-counts palms. In the production run, naive summing gave
 1,021,163 palms; resolving the overlap gave 718,751 (a 29.6% correction). The method is in
 [RESULTS.md](RESULTS.md#cross-block-overlap-resolution-methodology-note).
+
+## Work with me
+
+The model and pipeline are free to use under the licence below. If you manage a plantation
+or a project and need palm counts, a model tuned to your own imagery, or training for your
+team, get in touch: [o.oyin1115@gmail.com](mailto:o.oyin1115@gmail.com).
 
 ## Licence
 

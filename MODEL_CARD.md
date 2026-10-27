@@ -21,7 +21,8 @@ count 718,751 palms over 12,166.6 ha.
 
 - **Developed by:** Oluwasola Oyinloye
 - **Model type:** YOLOv8s object detector, one class (`oil_palm`), 1280 × 1280 px input
-- **Weights:** `models/oil_palm_crown-current/weights/best.pt` (training run 9)
+- **Weights:** `models/oil_palm_crown-current/weights/best.pt` (training run 9); also on
+  [Hugging Face](https://huggingface.co/dexsholex/oil-palm-crown-detector) with an ONNX version
 - **Code:** https://github.com/Dexsholex/oil-palm-crown-detection
 - **Licence:** AGPL-3.0 (inherited from Ultralytics YOLOv8)
 

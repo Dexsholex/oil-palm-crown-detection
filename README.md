@@ -2,6 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23704654.svg)](https://doi.org/10.5281/zenodo.23704654)
 
+**Try it:** [count palms in your own drone image, in your browser](https://huggingface.co/spaces/dexsholex/oil-palm-counter).
+Nothing to install, and the image never leaves your computer.
+
 Detects and counts individual oil palms in drone (UAV) RGB orthomosaics and turns them into a
 GIS-ready palm inventory: one point and one crown box per palm, with confidence, crown area and
 block ID, as GeoPackage and CSV.
@@ -43,6 +46,8 @@ ONNX) can also be downloaded from
 - `models/oil_palm_crown-4/weights/best.pt` — the earlier baseline (run 4), kept for before/after comparison.
 - `models/oil_palm_crown*/` — training curves, confusion matrices and settings for every training run.
 - `evaluation/` — test-split results and per-tile hand vs. model counts.
+- `demo/` — the in-browser palm counter (a static web page using ONNX Runtime Web), published
+  as a [Hugging Face Space](https://huggingface.co/spaces/dexsholex/oil-palm-counter).
 - `docs/` — methodology, scaling workflow and a step-by-step runbook for new blocks.
 
 The drone imagery, annotations and production outputs belong to the plantation owner and are
@@ -157,11 +162,24 @@ file — summing per-block counts double-counts palms. In the production run, na
 1,021,163 palms; resolving the overlap gave 718,751 (a 29.6% correction). The method is in
 [RESULTS.md](RESULTS.md#cross-block-overlap-resolution-methodology-note).
 
-## Work with me
+## Roadmap and partnerships
 
-The model and pipeline are free to use under the licence below. If you manage a plantation
-or a project and need palm counts, a model tuned to your own imagery, or training for your
-team, get in touch: [o.oyin1115@gmail.com](mailto:o.oyin1115@gmail.com).
+Where this work is going next, and what would move it faster:
+
+- **Validate on more plantations and regions.** Needs drone orthomosaics (about 2 cm/px) with
+  field or hand counts.
+- **Handle mature, overlapping canopy.** On close-up imagery of mature palms the model finds
+  only about half of them; fine-tuning on labelled imagery like that should close the gap.
+- **An open benchmark.** A labelled set of palm crowns from openly licensed imagery, so others
+  can train and compare models.
+- **Missing-palm and replanting maps** from repeat drone flights.
+- **Map coordinates in the browser demo**, reading GeoTIFFs directly.
+
+I welcome collaboration with research institutes, universities, NGOs, government agencies,
+companies and startups. The most useful contributions are imagery and field counts, GPU
+compute or cloud credits, and joint research, including PhD research and co-supervision. In
+return I can offer palm inventories, a model tuned to your imagery, pilot projects and training
+for your team. Get in touch: [o.oyin1115@gmail.com](mailto:o.oyin1115@gmail.com).
 
 ## Licence
 
@@ -177,5 +195,6 @@ If you use this code or model, please cite it: DOI
 
 ## Author
 
-Oluwasola Oyinloye — [GitHub @Dexsholex](https://github.com/Dexsholex). Model released with the
+Oluwasola Oyinloye — [GitHub @Dexsholex](https://github.com/Dexsholex) ·
+[ORCID 0009-0003-4990-9944](https://orcid.org/0009-0003-4990-9944). Model released with the
 permission of the plantation owner.

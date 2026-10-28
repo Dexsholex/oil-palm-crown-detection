@@ -19,11 +19,12 @@ orthomosaic tiles. Paired with the pipeline in this repository, it turns a geore
 orthomosaic into a palm inventory (one point and crown box per palm). Used in production to
 count 718,751 palms over 12,166.6 ha.
 
-- **Developed by:** Oluwasola Oyinloye
+- **Developed by:** Oluwasola Oyinloye ([ORCID 0009-0003-4990-9944](https://orcid.org/0009-0003-4990-9944))
 - **Model type:** YOLOv8s object detector, one class (`oil_palm`), 1280 × 1280 px input
 - **Weights:** `models/oil_palm_crown-current/weights/best.pt` (training run 9); also on
   [Hugging Face](https://huggingface.co/dexsholex/oil-palm-crown-detector) with an ONNX version
 - **Code:** https://github.com/Dexsholex/oil-palm-crown-detection
+- **Try it in your browser:** [Oil Palm Counter](https://huggingface.co/spaces/dexsholex/oil-palm-counter)
 - **Licence:** AGPL-3.0 (inherited from Ultralytics YOLOv8)
 
 ## Intended use

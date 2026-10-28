@@ -7,13 +7,15 @@ abstract: >-
   oil palms in drone RGB orthomosaics and produces a GIS-ready palm inventory. Trained on
   4,041 hand-labelled crowns; on held-out test tiles it reaches precision 0.845 and recall
   0.774, and its tile-interior palm count is within 0.2% of the hand count. Used in
-  production to count 718,751 palms over 12,166.6 ha in West Africa.
+  production to count 718,751 palms over 12,166.6 ha in West Africa. Includes an in-browser
+  demo that runs the model on the user's own computer.
 authors:
   - given-names: Oluwasola
     family-names: Oyinloye
     email: o.oyin1115@gmail.com
-version: 1.0.0
-date-released: "2026-10-27"
+    orcid: "https://orcid.org/0009-0003-4990-9944"
+version: 1.1.0
+date-released: "2026-10-28"
 doi: 10.5281/zenodo.23704654
 identifiers:
   - type: doi

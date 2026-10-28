@@ -1,5 +1,7 @@
 # Oil Palm Crown Detection & Counting
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23704654.svg)](https://doi.org/10.5281/zenodo.23704654)
+
 Detects and counts individual oil palms in drone (UAV) RGB orthomosaics and turns them into a
 GIS-ready palm inventory: one point and one crown box per palm, with confidence, crown area and
 block ID, as GeoPackage and CSV.
@@ -168,8 +170,10 @@ AGPL-3.0 — see [LICENSE](LICENSE). The detector is built on
 
 ## Citation
 
-If you use this code or model, please cite it — see [CITATION.cff](CITATION.cff), or use
-GitHub's "Cite this repository" button.
+If you use this code or model, please cite it: DOI
+[10.5281/zenodo.23704654](https://doi.org/10.5281/zenodo.23704654) (all versions; v1.0.0 is
+10.5281/zenodo.23704655). Full details are in [CITATION.cff](CITATION.cff), or use GitHub's
+"Cite this repository" button.
 
 ## Author
 

@@ -163,4 +163,5 @@ print(len(result.boxes), "palms")
 
 ## Citation
 
-See [CITATION.cff](CITATION.cff).
+DOI [10.5281/zenodo.23704654](https://doi.org/10.5281/zenodo.23704654) (all versions). Full
+details in [CITATION.cff](CITATION.cff).

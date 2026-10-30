@@ -177,7 +177,7 @@ Where this work is going next, and what would move it faster:
 
 I welcome collaboration with research institutes, universities, NGOs, government agencies,
 companies and startups. The most useful contributions are imagery and field counts, GPU
-compute or cloud credits, and joint research, including PhD research and co-supervision. In
+compute or cloud credits, and joint research and publications. In
 return I can offer palm inventories, a model tuned to your imagery, pilot projects and training
 for your team. Get in touch: [o.oyin1115@gmail.com](mailto:o.oyin1115@gmail.com).
 

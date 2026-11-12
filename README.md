@@ -31,6 +31,13 @@ never trained on:
 | mAP@0.5 | 0.844 | 0.698 |
 | Palm count vs. hand count, tile interiors | 519 vs 518 (+0.2%) | 454 vs 518 (−12.4%) |
 
+**New in v1.2.0:** a second model, trained on these tiles together with 276 labelled public
+drone photos from an oil palm plantation in Peru. On the West African test tiles it scores the
+same as the released model (tile-interior count 522 vs 518 by hand). On held-out Peru photos it
+finds 98% of the palms, where the released model finds 47%. Fine-tuning on the Peru photos alone
+reached a similar Peru score but broke the model on West Africa; training on both sites at once
+avoids that. Details in [evaluation/](evaluation/#fine-tuning-on-peru-photos).
+
 Per-block results and the method for resolving overlapping block deliveries are in
 [RESULTS.md](RESULTS.md). Model details, the full evaluation and limitations are in
 [MODEL_CARD.md](MODEL_CARD.md) and [evaluation/](evaluation/). The model files (PyTorch and
@@ -43,9 +50,14 @@ ONNX) can also be downloaded from
   training, inference, de-duplication, canopy-height QC, counting accuracy, inventory merge,
   test-split evaluation and ONNX export.
 - `models/oil_palm_crown-current/weights/best.pt` — the released model (training run 9).
+- `models/oil_palm_crown-joint/weights/best.pt` — the model trained on both sites (West Africa
+  and Peru), added in v1.2.0.
 - `models/oil_palm_crown-4/weights/best.pt` — the earlier baseline (run 4), kept for before/after comparison.
 - `models/oil_palm_crown*/` — training curves, confusion matrices and settings for every training run.
-- `evaluation/` — test-split results and per-tile hand vs. model counts.
+- `evaluation/` — test-split results, per-tile hand vs. model counts and the Peru results.
+- `notebooks/` — Kaggle/Colab notebooks for fine-tuning on the public Peru photos
+  (`finetune_peru.ipynb`) and for training on both sites (`finetune_joint.ipynb`, which needs
+  the private West African tiles).
 - `demo/` — the in-browser palm counter (a static web page using ONNX Runtime Web), published
   as a [Hugging Face Space](https://huggingface.co/spaces/dexsholex/oil-palm-counter).
 - `docs/` — methodology, scaling workflow and a step-by-step runbook for new blocks.
@@ -85,7 +97,9 @@ Results land in `outputs/inventory/<block>_palm_inventory.gpkg` (layers `crowns`
 The model was trained on orthomosaics (about 2 cm/px) of a relatively young plantation.
 Imagery at a very different resolution may need resampling, and imagery of tall mature palms
 with heavily overlapping crowns needs fine-tuning: on an independent set of close-up photos of
-mature palms from Peru it found at best about half the palms (see
+mature palms from Peru the released model found at best about half the palms. The model
+trained on both sites (`models/oil_palm_crown-joint/weights/best.pt`) finds 98% of them, after
+training on labelled photos from that plantation (see
 [evaluation/](evaluation/#outside-imagery-an-independent-dataset-from-peru)). Check a sample
 visually with `scripts/visualize_detections.py` before trusting a count. See [docs/NEW_BLOCK_RUNBOOK.md](docs/NEW_BLOCK_RUNBOOK.md) for the
 full per-block workflow.
@@ -168,8 +182,9 @@ Where this work is going next, and what would move it faster:
 
 - **Validate on more plantations and regions.** Needs drone orthomosaics (about 2 cm/px) with
   field or hand counts.
-- **Handle mature, overlapping canopy.** On close-up imagery of mature palms the model finds
-  only about half of them; fine-tuning on labelled imagery like that should close the gap.
+- **Plantations the model has never seen.** Training on 276 labelled photos of mature palms
+  from Peru took the model from 47% to 98% of palms found there without losing the original
+  site. The open question is how well it does on new plantations with few or no labels.
 - **An open benchmark.** A labelled set of palm crowns from openly licensed imagery, so others
   can train and compare models.
 - **Missing-palm and replanting maps** from repeat drone flights.
@@ -190,11 +205,14 @@ AGPL-3.0 — see [LICENSE](LICENSE). The detector is built on
 
 If you use this code or model, please cite it: DOI
 [10.5281/zenodo.23704654](https://doi.org/10.5281/zenodo.23704654) (all versions; v1.0.0 is
-10.5281/zenodo.23704655). Full details are in [CITATION.cff](CITATION.cff), or use GitHub's
-"Cite this repository" button.
+10.5281/zenodo.23704655, v1.1.0 is 10.5281/zenodo.23892275). Full details are in
+[CITATION.cff](CITATION.cff), or use GitHub's "Cite this repository" button. If you use the
+model trained on both sites, please also cite the Peru dataset: Dominguez Meza & Rituay,
+*Oil Palm Tree Detection for Anomaly Identification*, Mendeley Data,
+[doi:10.17632/nh7d23dgnw.1](https://doi.org/10.17632/nh7d23dgnw.1).
 
 ## Author
 
 Oluwasola Oyinloye — [GitHub @Dexsholex](https://github.com/Dexsholex) ·
-[ORCID 0009-0003-4990-9944](https://orcid.org/0009-0003-4990-9944). Model released with the
+[ORCID 0009-0003-4990-9944](https://orcid.org/0009-0003-4990-9944). Models released with the
 permission of the plantation owner.

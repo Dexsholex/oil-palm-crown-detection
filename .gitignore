@@ -32,6 +32,9 @@ models/*/weights/
 !models/oil_palm_crown-4/
 !models/oil_palm_crown-4/weights/
 !models/oil_palm_crown-4/weights/best.pt
+!models/oil_palm_crown-joint/
+!models/oil_palm_crown-joint/weights/
+!models/oil_palm_crown-joint/weights/best.pt
 models/oil_palm_crown-4/weights/last.pt
 models/oil_palm_crown-current/weights/last.pt
 /yolo26n.pt

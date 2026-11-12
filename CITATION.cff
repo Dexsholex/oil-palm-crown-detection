@@ -30,6 +30,9 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.23892275
     description: Version 1.1.0
+  - type: doi
+    value: 10.5281/zenodo.24163864
+    description: Version 1.2.0
 license: AGPL-3.0-only
 repository-code: "https://github.com/Dexsholex/oil-palm-crown-detection"
 keywords:

@@ -205,7 +205,8 @@ AGPL-3.0 — see [LICENSE](LICENSE). The detector is built on
 
 If you use this code or model, please cite it: DOI
 [10.5281/zenodo.23704654](https://doi.org/10.5281/zenodo.23704654) (all versions; v1.0.0 is
-10.5281/zenodo.23704655, v1.1.0 is 10.5281/zenodo.23892275). Full details are in
+10.5281/zenodo.23704655, v1.1.0 is 10.5281/zenodo.23892275, v1.2.0 is
+10.5281/zenodo.24163864). Full details are in
 [CITATION.cff](CITATION.cff), or use GitHub's "Cite this repository" button. If you use the
 model trained on both sites, please also cite the Peru dataset: Dominguez Meza & Rituay,
 *Oil Palm Tree Detection for Anomaly Identification*, Mendeley Data,

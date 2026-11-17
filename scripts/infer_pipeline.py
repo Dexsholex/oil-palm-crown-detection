@@ -7,6 +7,11 @@ geospatial palm inventory (crown polygons + centroids).
 Requires tile_orthomosaic.py to have been run for the block first (for
 tile_index.csv — the pixel->world affine transform per tile).
 
+Boxes the model finds with confidence between inference.review_conf (0.10) and the counting
+threshold conf_thresh (0.25) are not counted. They are saved in a separate layer,
+review_candidates, as possible misses for scripts/review_queue.py. The count and the crowns
+and centroids layers are exactly what a run at conf_thresh alone would give.
+
 Usage:
     python scripts/infer_pipeline.py --block pilot --weights models/oil_palm_crown/weights/best.pt
 """
@@ -75,6 +80,28 @@ def geo_nms(gdf: gpd.GeoDataFrame, iou_thresh: float, centroid_dist_thresh: floa
     return gdf[keep].reset_index(drop=True)
 
 
+def split_and_dedup(gdf: gpd.GeoDataFrame, conf: float, merge_iou: float):
+    """Split raw detections at the counting threshold and remove duplicates.
+
+    Returns (crowns, candidates). crowns: detections with confidence >= conf after geo_nms,
+    exactly as if inference had run at conf. candidates: lower-confidence detections that do
+    not duplicate a crown or each other (possible misses for review; never counted).
+
+    Re-running geo_nms over crowns + candidates removes no crown: every crown has a higher
+    confidence than every candidate, and greedy NMS already left no duplicate pair among the
+    crowns, so only candidates can be suppressed.
+    """
+    crowns = geo_nms(gdf[gdf["confidence"] >= conf], merge_iou)
+    low = gdf[gdf["confidence"] < conf]
+    if len(low) == 0:
+        return crowns, low.reset_index(drop=True)
+    both = pd.concat([crowns.assign(_cand=False), low.assign(_cand=True)], ignore_index=True)
+    both = geo_nms(gpd.GeoDataFrame(both, crs=gdf.crs), merge_iou)
+    assert int((~both["_cand"]).sum()) == len(crowns), "a candidate suppressed a counted crown"
+    candidates = both[both["_cand"]].drop(columns="_cand").reset_index(drop=True)
+    return crowns, candidates
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--block", required=True)
@@ -82,6 +109,9 @@ def main():
     ap.add_argument("--conf", type=float, default=None)
     ap.add_argument("--iou", type=float, default=None)
     ap.add_argument("--merge-iou", type=float, default=None)
+    ap.add_argument("--review-conf", type=float, default=None,
+                    help="also keep boxes down to this confidence as possible misses for review "
+                         "(not counted); default inference.review_conf in the config")
     args = ap.parse_args()
 
     cfg = load_config()
@@ -90,6 +120,7 @@ def main():
     conf = args.conf or inf_cfg["conf_thresh"]
     iou = args.iou or inf_cfg["iou_thresh"]
     merge_iou = args.merge_iou or inf_cfg["merge_iou_thresh"]
+    review_conf = min(args.review_conf or inf_cfg.get("review_conf", conf), conf)
 
     tiles_dir = PROJECT_ROOT / cfg["paths"]["tiles_dir"] / args.block
     index_path = tiles_dir / "tile_index.csv"
@@ -104,7 +135,7 @@ def main():
     records = []
     results = model.predict(
         source=str(image_dir),
-        conf=conf,
+        conf=review_conf,
         iou=iou,
         imgsz=cfg["model"]["imgsz"],
         device=cfg["model"]["device"],
@@ -142,18 +173,33 @@ def main():
         if n_tiles_done % 200 == 0:
             print(f"  ... {n_tiles_done} tiles inferred, {len(records)} raw detections so far", flush=True)
 
-    print(f"Inference done: {n_tiles_done} tiles, {len(records)} raw (pre-dedup) detections", flush=True)
-    if not records:
+    n_counted = sum(r["confidence"] >= conf for r in records)
+    print(f"Inference done: {n_tiles_done} tiles, {n_counted} raw (pre-dedup) detections at confidence "
+          f">= {conf}, plus {len(records) - n_counted} between {review_conf} and {conf} for review", flush=True)
+    if not n_counted:
         print("No detections found.", flush=True)
         return
 
     gdf = gpd.GeoDataFrame(records, crs=cfg["crs"])
-    deduped = geo_nms(gdf, merge_iou)
-    print(f"After cross-tile duplicate removal (IoU >= {merge_iou}): {len(deduped)} crowns", flush=True)
+    deduped, candidates = split_and_dedup(gdf, conf, merge_iou)
+    print(f"After cross-tile duplicate removal (IoU >= {merge_iou}): {len(deduped)} crowns "
+          f"(+ {len(candidates)} possible misses for review, not counted)", flush=True)
 
-    deduped["Tree_ID"] = [f"{args.block}_{i+1:06d}" for i in range(len(deduped))]
+    out_dir = PROJECT_ROOT / cfg["paths"]["outputs_dir"] / "inventory"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    gpkg_path, csv_path = write_inventory(deduped, candidates, args.block, out_dir)
+
+    print(f"\n=== Block '{args.block}' total palm count: {len(deduped)} ===", flush=True)
+    print(f"Geospatial inventory: {gpkg_path}  (layers: crowns, centroids, review_candidates)", flush=True)
+    print(f"CSV table: {csv_path}", flush=True)
+
+
+def write_inventory(deduped: gpd.GeoDataFrame, candidates: gpd.GeoDataFrame, block_id: str, out_dir):
+    """Write the crowns and centroids layers (the inventory), the review_candidates layer, and the CSV."""
+    deduped = deduped.copy()
+    deduped["Tree_ID"] = [f"{block_id}_{i+1:06d}" for i in range(len(deduped))]
     deduped["Crown_ID"] = deduped["Tree_ID"]
-    deduped["Block_ID"] = args.block
+    deduped["Block_ID"] = block_id
     deduped["Confidence"] = deduped["confidence"]
     deduped["Crown_Area_m2"] = deduped.geometry.area
     centroids = deduped.geometry.centroid
@@ -166,18 +212,24 @@ def main():
     points_out = crowns_out.copy()
     points_out["geometry"] = centroids
 
-    out_dir = PROJECT_ROOT / cfg["paths"]["outputs_dir"] / "inventory"
-    out_dir.mkdir(parents=True, exist_ok=True)
-    gpkg_path = out_dir / f"{args.block}_palm_inventory.gpkg"
+    gpkg_path = out_dir / f"{block_id}_palm_inventory.gpkg"
     crowns_out.to_file(gpkg_path, layer="crowns", driver="GPKG")
     points_out.to_file(gpkg_path, layer="centroids", driver="GPKG")
 
-    csv_path = out_dir / f"{args.block}_palm_inventory.csv"
-    crowns_out.drop(columns="geometry").to_csv(csv_path, index=False)
+    if len(candidates):
+        cand = candidates.copy()
+        cand["Cand_ID"] = [f"{block_id}_c{i+1:06d}" for i in range(len(cand))]
+        cand["Block_ID"] = block_id
+        cand["Confidence"] = cand["confidence"]
+        cand_centroids = cand.geometry.centroid
+        cand["Easting"] = cand_centroids.x
+        cand["Northing"] = cand_centroids.y
+        cand[["Cand_ID", "Block_ID", "Confidence", "Easting", "Northing", "geometry"]].to_file(
+            gpkg_path, layer="review_candidates", driver="GPKG")
 
-    print(f"\n=== Block '{args.block}' total palm count: {len(deduped)} ===", flush=True)
-    print(f"Geospatial inventory: {gpkg_path}  (layers: crowns, centroids)", flush=True)
-    print(f"CSV table: {csv_path}", flush=True)
+    csv_path = out_dir / f"{block_id}_palm_inventory.csv"
+    crowns_out.drop(columns="geometry").to_csv(csv_path, index=False)
+    return gpkg_path, csv_path
 
 
 if __name__ == "__main__":

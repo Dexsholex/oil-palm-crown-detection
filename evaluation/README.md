@@ -17,6 +17,7 @@ Produced with:
 python scripts/evaluate_test_split.py --weights models/oil_palm_crown-current/weights/best.pt --name final
 python scripts/evaluate_test_split.py --weights models/oil_palm_crown-4/weights/best.pt --name baseline
 python scripts/evaluate_test_split.py --weights models/oil_palm_crown-joint/weights/best.pt --name joint
+python scripts/evaluate_review_queue.py --weights models/oil_palm_crown-current/weights/best.pt
 ```
 
 The labelled tiles themselves are the plantation owner's imagery and are not published.
@@ -72,6 +73,43 @@ What this shows:
 
 These are tile-level checks on held-out ground. No field count over a whole block has been
 done.
+
+## Review queue
+
+`scripts/review_queue.py` asks a person to check the cases the released model is least sure
+about: counted detections with confidence below 0.5 ("doubtful detections") and boxes with
+confidence between 0.10 and 0.25 that the pipeline did not count ("possible misses"), ranked by
+how close their confidence is to the 0.25 cut-off. `scripts/evaluate_review_queue.py` measures
+how many of the model's mistakes that ranking finds on the test tiles (interiors only, as for
+the interior count; a mistake counts as fixed when a reviewer who agrees with the hand labels
+would delete a false detection or add a missed palm):
+
+```bash
+python scripts/evaluate_review_queue.py --weights models/oil_palm_crown-current/weights/best.pt
+```
+
+The released model makes 171 mistakes on the 518 interior palms: 86 false detections and 85
+misses. The queue has 352 items, 68 for every 100 counted detections.
+
+| Items checked | Mistakes fixed | Checking the same number of random detections |
+|---|---|---|
+| First 10% (35) | 19 (11.1%) | 5.9 (3.4%) |
+| First 25% (88) | 43 (25.1%) | 14.8 (8.7%) |
+| First 50% (176) | 62 (36.3%) | 29.3 (17.1%) |
+| All (352) | 82 (48.0%) | 58.6 (34.3%) |
+
+What this shows:
+
+- Ranking pays off at the top: in the first 10% of the queue, more than half the items are a
+  real mistake, and the first quarter fixes about three times as many mistakes as random
+  checking.
+- Most queue items further down are correct detections with middling confidence, so a fixed
+  review budget (`--max-items`) from the top of the queue is the efficient way to use it.
+- The queue cannot reach about half the mistakes: 22 false detections have confidence of 0.5 or
+  more, and 66 of the 85 misses have no box at all above 0.10. Those need another signal, such
+  as gaps in the regular planting grid.
+- The hand labels are treated as right. Some "false detections" may be palms the annotators
+  missed, so the reviewer would keep them and fix nothing.
 
 ## Outside imagery: an independent dataset from Peru
 

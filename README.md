@@ -48,7 +48,7 @@ ONNX) can also be downloaded from
 
 - `scripts/` — the full pipeline: data QC, tiling, annotation sampling, dataset building,
   training, inference, de-duplication, canopy-height QC, counting accuracy, inventory merge,
-  test-split evaluation and ONNX export.
+  test-split evaluation, a review queue for checking counts, and ONNX export.
 - `models/oil_palm_crown-current/weights/best.pt` — the released model (training run 9).
 - `models/oil_palm_crown-joint/weights/best.pt` — the model trained on both sites (West Africa
   and Peru), added in v1.2.0.
@@ -163,6 +163,23 @@ To fine-tune the released model instead of starting from COCO weights, pass
 - `centroids`: one point per palm (Easting/Northing), same attributes
 
 `outputs/inventory/<block>_palm_inventory.csv` — flat table of the same fields.
+
+The GeoPackage also has a `review_candidates` layer: boxes the model found with confidence
+between 0.10 and 0.25. They are not counted; they are possible misses for the review queue.
+
+## Check the count: review queue
+
+```bash
+python scripts/review_queue.py --block <your_block_id>
+```
+
+This ranks the cases the model is least sure about (counted crowns with confidence below 0.5,
+and the possible misses) so a person checks the most uncertain first. It writes
+`outputs/review/<block>/<block>_review_queue.gpkg` (open it in QGIS over the orthomosaic and
+fill the `Decision` column with `palm` or `not palm`), one picture per item and contact sheets
+for a quick first pass. On the 79 held-out test tiles, checking the first quarter of the queue
+fixed 25% of the model's mistakes, about three times what checking the same number of random
+detections fixes (see [evaluation/](evaluation/#review-queue)).
 
 ## Scaling to many blocks
 

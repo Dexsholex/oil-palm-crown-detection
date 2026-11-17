@@ -1,9 +1,9 @@
 # Core geospatial
 rasterio>=1.3
-geopandas>=0.14
+geopandas>=1.0
+pyogrio>=0.7               # GeoPackage reading/writing for geopandas (fiona has no Python 3.14 wheel)
 shapely>=2.0
 pyproj>=3.6
-fiona>=1.9
 affine>=2.4
 
 # Raster/array/image

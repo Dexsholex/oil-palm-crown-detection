@@ -24,6 +24,8 @@ inference:
   conf_thresh: 0.25
   iou_thresh: 0.45           # NMS IoU threshold within a tile
   merge_iou_thresh: 0.3       # IoU threshold for de-duplicating across overlapping tiles
+  review_conf: 0.10           # boxes between this and conf_thresh are saved as possible misses for review (not counted)
+  review_high_conf: 0.5       # kept detections below this go into the review queue as doubtful
 
 paths:
   tiles_dir: tiles
